@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jason Knight — App Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ── TOKENS ── */
+:root {
+  --ink:       #0D0D14;
+  --ink2:      #161622;
+  --ink3:      #1F1F30;
+  --rule:      rgba(255,255,255,0.07);
+  --rule2:     rgba(255,255,255,0.12);
+  --text:      #EEEAF8;
+  --muted:     #7A789A;
+  --faint:     #3A384E;
+
+  --gold:      #E8B84B;
+  --gold-soft: rgba(232,184,75,0.12);
+  --green:     #3DD68C;
+  --green-soft:rgba(61,214,140,0.10);
+  --blue:      #5B9CF6;
+  --blue-soft: rgba(91,156,246,0.10);
+  --rose:      #F06292;
+  --rose-soft: rgba(240,98,146,0.10);
+  --violet:    #A78BFA;
+  --violet-soft:rgba(167,139,250,0.10);
+  --orange:    #FB923C;
+  --orange-soft:rgba(251,146,60,0.10);
+
+  --serif:  'DM Serif Display', Georgia, serif;
+  --sans:   'DM Sans', system-ui, sans-serif;
+  --mono:   'DM Mono', monospace;
+  --r:      14px;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--ink);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── GRAIN OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.6;
+}
+
+/* ── GRID LINES (decorative) ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+  opacity: 0.4;
+}
+
+/* ── LAYOUT ── */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative; z-index: 1;
+  padding: 64px 24px 0;
+  max-width: 960px;
+  margin: 0 auto 56px;
+}
+
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.identity {}
+
+.name-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--ink), 0 0 0 4px rgba(232,184,75,0.3);
+}
+
+.name {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.name em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.role-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.role-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+
+.header-mission {
+  max-width: 520px;
+  margin-top: 20px;
+}
+
+.mission-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.mission-text {
+  font-family: var(--serif);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-style: italic;
+  color: rgba(238,234,248,0.7);
+  line-height: 1.6;
+}
+
+/* ── STATUS PILLS ── */
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.status-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-gold  { background: var(--gold);   box-shadow: 0 0 6px var(--gold); }
+.dot-green { background: var(--green);  box-shadow: 0 0 6px var(--green); }
+.dot-blue  { background: var(--blue);   box-shadow: 0 0 6px var(--blue); }
+.dot-faint { background: var(--faint); }
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 48px;
+  animation: riseIn 0.6s ease both;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.section-icon {
+  font-size: 16px;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.section-rule { flex: 1; height: 1px; background: var(--rule); }
+
+.section-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+
+/* ── APP GRID ── */
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+/* ── APP CARD ── */
+.app-card {
+  background: var(--ink2);
+  border: 1px solid var(--rule2);
+  border-radius: var(--r);
+  padding: 22px 22px 18px;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: var(--r) var(--r) 0 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.app-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.16);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+}
+
+.app-card:hover::before { opacity: 1; }
+
+/* color themes */
+.card-gold  { --c: var(--gold);   --cs: var(--gold-soft); }
+.card-green { --c: var(--green);  --cs: var(--green-soft); }
+.card-blue  { --c: var(--blue);   --cs: var(--blue-soft); }
+.card-rose  { --c: var(--rose);   --cs: var(--rose-soft); }
+.card-violet{ --c: var(--violet); --cs: var(--violet-soft); }
+.card-orange{ --c: var(--orange); --cs: var(--orange-soft); }
+
+.app-card::before { background: var(--c); }
+.app-card:hover { border-color: color-mix(in srgb, var(--c) 30%, transparent); }
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.card-icon-wrap {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: var(--cs);
+  border: 1px solid color-mix(in srgb, var(--c) 20%, transparent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.card-status {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+.status-live    { background: var(--green-soft); color: var(--green); }
+.status-soon    { background: rgba(255,255,255,0.04); color: var(--faint); border: 1px solid var(--rule); }
+.status-wip     { background: var(--gold-soft); color: var(--gold); }
+
+.card-name {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.card-desc {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: var(--ink3);
+  color: var(--faint);
+}
+
+.card-arrow {
+  font-size: 14px;
+  color: var(--muted);
+  transition: transform 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.app-card:hover .card-arrow {
+  transform: translateX(3px);
+  color: var(--c);
+}
+
+/* ── COMING SOON CARD ── */
+.app-card.coming-soon {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-left {
+  font-size: 0.8rem;
+  color: var(--faint);
+  font-family: var(--mono);
+}
+
+.footer-left strong { color: var(--muted); }
+
+.footer-right {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-link {
+  font-size: 0.78rem;
+  font-family: var(--mono);
+  color: var(--faint);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.footer-link:hover { color: var(--gold); }
+
+/* ── ANIMATIONS ── */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.12s; }
+.section:nth-child(3) { animation-delay: 0.19s; }
+.section:nth-child(4) { animation-delay: 0.26s; }
+.section:nth-child(5) { animation-delay: 0.33s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  header { padding: 40px 0 0; }
+  .header-top { flex-direction: column; }
+  .app-grid { grid-template-columns: 1fr; }
+  .status-row { gap: 6px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<header>
+  <div class="header-top">
+    <div class="identity">
+      <div class="name-lockup">
+        <div class="avatar">⚡</div>
+        <div>
+          <div class="name">Jason <em>Knight</em></div>
+        </div>
+      </div>
+      <div class="role-line">
+        GM Coach · Walmart
+        <span class="role-dot"></span>
+        Springfield, OR
+        <span class="role-dot"></span>
+        Builder
+      </div>
+    </div>
+  </div>
+
+  <div class="header-mission">
+    <div class="mission-label">Mission</div>
+    <div class="mission-text">"Grow health, wealth, wisdom &amp; available time — every single day."</div>
+  </div>
+
+  <div class="status-row">
+    <div class="status-pill"><span class="dot dot-green"></span> Kai's Academy — Live</div>
+    <div class="status-pill"><span class="dot dot-gold"></span> Finance Tracker — In Progress</div>
+    <div class="status-pill"><span class="dot dot-blue"></span> Health Dashboard — Planned</div>
+    <div class="status-pill"><span class="dot dot-faint"></span> Team Tools — Planned</div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════ APPS ═══════════════════════════ -->
+<div class="wrap">
+
+  <!-- ── EDUCATION ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--gold-soft);">📚</div>
+      <div class="section-title">Education</div>
+      <div class="section-rule"></div>
+      <div class="section-count">1 of 3 live</div>
+    </div>
+    <div class="app-grid">
+
+      <a href="kai-academy.html" class="app-card card-gold">
+        <div class="card-top">
+          <div class="card-icon-wrap">🚀</div>
+          <div class="card-status status-live">Live</div>
+        </div>
+        <div class="card-name">Kai's Academy</div>
+        <div class="card-desc">AI Wizard + Money Master curriculum for Kai. 8 weeks each, 4 days/week, embedded videos, XP system, and personalized onboarding.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">AI</span>
+            <span class="tag">Finance</span>
+            <span class="tag">Kids</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </a>
+
+      <div class="app-card card-blue coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">🧠</div>
+          <div class="card-status status-soon">Coming Soon</div>
+        </div>
+        <div class="card-name">Wisdom Track</div>
+        <div class="card-desc">A self-directed learning curriculum for books, philosophy, and big ideas. Daily reading prompts and reflection tools.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Reading</span>
+            <span class="tag">Growth</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="app-card card-violet coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">🏢</div>
+          <div class="card-status status-soon">Coming Soon</div>
+        </div>
+        <div class="card-name">Leadership Lab</div>
+        <div class="card-desc">Training tools for Gena, Ismael, Austen, and Emily — communication, metrics, and team development modules.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Team</span>
+            <span class="tag">Walmart</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── FINANCE ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--green-soft);">💰</div>
+      <div class="section-title">Finance</div>
+      <div class="section-rule"></div>
+      <div class="section-count">0 of 2 live</div>
+    </div>
+    <div class="app-grid">
+
+      <div class="app-card card-green coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">📊</div>
+          <div class="card-status status-wip">In Progress</div>
+        </div>
+        <div class="card-name">Finance Dashboard</div>
+        <div class="card-desc">Personal budget tracker with 70/10/10/10 bucket system — expenses, debt payoff, investing, and dream fund in one view.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Budget</span>
+            <span class="tag">Investing</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="app-card card-orange coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">📈</div>
+          <div class="card-status status-soon">Coming Soon</div>
+        </div>
+        <div class="card-name">Investment Tracker</div>
+        <div class="card-desc">Track portfolio performance, recurring contributions, and compound growth projections toward financial independence.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Wealth</span>
+            <span class="tag">Goals</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── HEALTH ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--rose-soft);">❤️</div>
+      <div class="section-title">Health</div>
+      <div class="section-rule"></div>
+      <div class="section-count">0 of 2 live</div>
+    </div>
+    <div class="app-grid">
+
+      <div class="app-card card-rose coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">💪</div>
+          <div class="card-status status-soon">Coming Soon</div>
+        </div>
+        <div class="card-name">Health Dashboard</div>
+        <div class="card-desc">Workout tracking, sleep, nutrition, and supplement logging. Built around a solid daily routine with streaks and progress snapshots.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Fitness</span>
+            <span class="tag">Sleep</span>
+            <span class="tag">Nutrition</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="app-card card-blue coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">🧘</div>
+          <div class="card-status status-soon">Coming Soon</div>
+        </div>
+        <div class="card-name">Daily Habits</div>
+        <div class="card-desc">Morning routine builder, habit streaks, and a weekly review system. Covers body, mind, and energy management.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Routines</span>
+            <span class="tag">Mindset</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── WORK ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--violet-soft);">🏪</div>
+      <div class="section-title">Work & Team</div>
+      <div class="section-rule"></div>
+      <div class="section-count">0 of 2 live</div>
+    </div>
+    <div class="app-grid">
+
+      <div class="app-card card-violet coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">📋</div>
+          <div class="card-status status-soon">Coming Soon</div>
+        </div>
+        <div class="card-name">Team Metrics Hub</div>
+        <div class="card-desc">Market-level performance tracker for all 4 Team Leads. Visualize trends, coach with data, and document wins.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Metrics</span>
+            <span class="tag">Coaching</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="app-card card-gold coming-soon">
+        <div class="card-top">
+          <div class="card-icon-wrap">💡</div>
+          <div class="card-status status-soon">Coming Soon</div>
+        </div>
+        <div class="card-name">Business Builder</div>
+        <div class="card-desc">Idea validation, business model canvas, and AI-assisted launch planning for your next venture outside of Walmart.</div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="tag">Startup</span>
+            <span class="tag">Strategy</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer>
+  <div class="footer-left">
+    Built with <strong>Claude</strong> · Hosted on GitHub Pages
+  </div>
+  <div class="footer-right">
+    <a href="https://github.com" class="footer-link" target="_blank">GitHub</a>
+    <a href="https://claude.ai" class="footer-link" target="_blank">Claude</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kai's Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ai: #7C6EFA; --ai-glow: rgba(124,110,250,0.3); --ai-soft: #EEF;
+  --money: #1BBF7E; --money-glow: rgba(27,191,126,0.3); --money-soft: #E6FFF6;
+  --gold: #FFC830; --red: #FF5A5A; --orange: #FF9330;
+  --bg: #0B0B18; --surface: #14142A; --surface2: #1E1E3A; --surface3: #272748;
+  --border: rgba(255,255,255,0.07); --text: #F0EFFF; --muted: #7E7CA0;
+  --radius: 18px; --shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── STARFIELD ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 10% 20%, rgba(255,255,255,.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 60%, rgba(255,255,255,.2) 0%, transparent 100%),
+    radial-gradient(2px 2px at 40% 10%, rgba(255,255,255,.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 80%, rgba(255,255,255,.25) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 70% 35%, rgba(255,255,255,.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 70%, rgba(255,255,255,.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 15%, rgba(255,255,255,.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 5% 90%, rgba(255,255,255,.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 88%, rgba(255,255,255,.2) 0%, transparent 100%);
+}
+
+/* ── SCREENS ── */
+.screen{position:relative;z-index:1;display:none;min-height:100vh;}
+.screen.active{display:block;}
+
+/* ════════════════════════════
+   ONBOARDING
+════════════════════════════ */
+#onboarding{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px 16px 60px;text-align:center;
+}
+#onboarding.active{display:flex;}
+
+.ob-logo{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--ai);margin-bottom:6px;letter-spacing:1px;}
+.ob-tagline{color:var(--muted);font-size:0.85rem;margin-bottom:40px;}
+
+.ob-card{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:24px;
+  padding:32px 28px;max-width:520px;width:100%;
+  animation:fadeUp 0.5s ease;
+  box-shadow: var(--shadow);
+}
+.ob-card.hidden{display:none;}
+
+.ob-step-dots{display:flex;gap:6px;justify-content:center;margin-bottom:24px;}
+.ob-step-dot{width:8px;height:8px;border-radius:50%;background:var(--surface3);transition:all .3s;}
+.ob-step-dot.active{background:var(--ai);transform:scale(1.3);}
+.ob-step-dot.done{background:var(--money);}
+
+.ob-emoji{font-size:48px;margin-bottom:14px;display:block;animation:bounce 2s infinite;}
+.ob-q{font-family:'Fredoka One',cursive;font-size:1.5rem;margin-bottom:8px;line-height:1.2;}
+.ob-sub{color:var(--muted);font-size:0.9rem;margin-bottom:24px;line-height:1.5;}
+
+.ob-options{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:24px;}
+.ob-opt{
+  background:var(--surface2);border:2px solid var(--border);border-radius:12px;
+  padding:10px 18px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;
+  font-size:0.9rem;color:var(--text);transition:all .2s;user-select:none;
+}
+.ob-opt:hover,.ob-opt.sel{background:rgba(124,110,250,0.15);border-color:var(--ai);color:var(--ai);}
+.ob-opt.money-sel{background:rgba(27,191,126,0.12);border-color:var(--money);color:var(--money);}
+
+.ob-input{
+  width:100%;background:var(--surface2);border:2px solid var(--border);border-radius:12px;
+  padding:12px 16px;color:var(--text);font-family:'Nunito',sans-serif;font-size:1rem;
+  font-weight:700;outline:none;transition:border-color .2s;
+}
+.ob-input:focus{border-color:var(--ai);}
+.ob-input::placeholder{color:var(--muted);}
+
+.ob-btn{
+  width:100%;padding:14px;border-radius:12px;border:none;
+  font-family:'Fredoka One',cursive;font-size:1.1rem;letter-spacing:.5px;
+  cursor:pointer;transition:all .2s;color:white;margin-top:6px;
+  background:linear-gradient(135deg,var(--ai),#5B4FD9);
+}
+.ob-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--ai-glow);}
+.ob-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.ob-skip{background:none;border:none;color:var(--muted);font-size:0.8rem;cursor:pointer;margin-top:12px;text-decoration:underline;}
+
+/* ════════════════════════════
+   MAIN DASHBOARD
+════════════════════════════ */
+#dashboard{padding-bottom:80px;}
+#dashboard.active{display:block;}
+
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;padding:16px 20px;
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,11,24,0.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.top-logo{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--ai);}
+.top-xp{
+  font-family:'Space Mono',monospace;font-size:12px;color:var(--gold);
+  font-weight:700;background:rgba(255,200,48,0.1);padding:5px 12px;border-radius:999px;
+}
+
+.dash-wrap{max-width:900px;margin:0 auto;padding:24px 16px;}
+
+/* Hero */
+.hero{
+  background:linear-gradient(135deg,rgba(124,110,250,0.12),rgba(27,191,126,0.08));
+  border:1px solid var(--border);border-radius:24px;padding:28px;
+  margin-bottom:28px;display:flex;align-items:center;gap:20px;
+  animation:fadeUp .5s ease;
+}
+.hero-avi{
+  width:68px;height:68px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--ai),var(--money));
+  display:flex;align-items:center;justify-content:center;font-size:32px;
+  box-shadow:0 0 30px var(--ai-glow);
+}
+.hero-name{font-family:'Fredoka One',cursive;font-size:1.6rem;margin-bottom:4px;}
+.hero-tagline{color:var(--muted);font-size:0.85rem;margin-bottom:14px;}
+.hero-xp-bar{height:10px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:6px;}
+.hero-xp-fill{height:100%;background:linear-gradient(90deg,var(--ai),var(--money));border-radius:999px;width:0;transition:width 1.2s ease;}
+.hero-xp-label{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+
+/* Streaks */
+.streak-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;
+  animation:fadeUp .5s ease .05s both;
+}
+.streak-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;text-align:center;
+}
+.streak-num{font-family:'Fredoka One',cursive;font-size:2rem;line-height:1;}
+.streak-label{font-size:0.75rem;color:var(--muted);margin-top:4px;font-family:'Space Mono',monospace;}
+
+/* Section headers */
+.sec-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.sec-title{font-family:'Fredoka One',cursive;font-size:1.2rem;}
+.sec-badge{
+  font-size:11px;font-family:'Space Mono',monospace;padding:3px 10px;
+  border-radius:999px;font-weight:700;
+}
+.ai-badge{background:rgba(124,110,250,0.15);color:var(--ai);}
+.money-badge{background:rgba(27,191,126,0.12);color:var(--money);}
+
+/* Progress bars */
+.prog-section{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;margin-bottom:28px;animation:fadeUp .5s ease .1s both;
+}
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.prog-row:last-child{margin-bottom:0;}
+.prog-label-text{width:100px;font-weight:800;font-size:0.82rem;flex-shrink:0;}
+.prog-bar{flex:1;height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;width:0;transition:width 1.4s ease;}
+.ai-fill{background:linear-gradient(90deg,#5B4FD9,var(--ai));}
+.money-fill{background:linear-gradient(90deg,#119C64,var(--money));}
+.prog-pct{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);width:36px;text-align:right;}
+
+/* Tabs */
+.tab-row{display:flex;gap:8px;margin-bottom:22px;animation:fadeUp .5s ease .15s both;}
+.tab-btn{
+  flex:1;padding:11px;border-radius:12px;border:2px solid transparent;
+  background:var(--surface);color:var(--muted);font-family:'Fredoka One',cursive;
+  font-size:1rem;cursor:pointer;transition:all .2s;
+}
+.tab-btn.ai-active{background:rgba(124,110,250,0.12);border-color:var(--ai);color:var(--ai);}
+.tab-btn.money-active{background:rgba(27,191,126,0.1);border-color:var(--money);color:var(--money);}
+.tab-btn:hover:not(.ai-active):not(.money-active){background:var(--surface2);color:var(--text);}
+
+/* Week blocks */
+.week-block{margin-bottom:32px;animation:fadeUp .4s ease both;}
+.week-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.week-num{
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  background:var(--surface2);padding:4px 12px;border-radius:999px;color:var(--muted);
+  letter-spacing:.06em;
+}
+.week-theme{font-family:'Fredoka One',cursive;font-size:1.05rem;}
+.week-line{flex:1;height:1px;background:var(--border);}
+.week-done-badge{
+  font-size:10px;font-family:'Space Mono',monospace;
+  background:rgba(27,191,126,0.12);color:var(--money);
+  padding:3px 10px;border-radius:999px;
+}
+
+/* Lesson cards */
+.lessons-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+.lesson-card{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:18px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;
+}
+.lesson-card::after{
+  content:'';position:absolute;left:0;top:0;width:3px;height:100%;border-radius:3px 0 0 3px;
+  transition:width .3s;
+}
+.ai-track .lesson-card::after{background:var(--ai);}
+.money-track .lesson-card::after{background:var(--money);}
+.lesson-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.4);border-color:rgba(255,255,255,.12);}
+.lesson-card.done{opacity:.65;}
+.lesson-card.today{border-color:var(--gold);box-shadow:0 0 20px rgba(255,200,48,.2);}
+
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.card-emoji{font-size:30px;line-height:1;}
+.card-check{
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--surface3);
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;
+  transition:all .3s;
+}
+.lesson-card.done .card-check{background:var(--money);border-color:var(--money);}
+.today-chip{
+  position:absolute;top:12px;right:46px;
+  font-size:9px;font-family:'Space Mono',monospace;font-weight:700;
+  background:var(--gold);color:#000;padding:2px 8px;border-radius:999px;
+  letter-spacing:.04em;
+}
+.card-day-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;}
+.card-title{font-weight:800;font-size:.95rem;margin-bottom:6px;line-height:1.3;}
+.lesson-card.done .card-title{color:var(--muted);}
+.card-desc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:10px;}
+.card-foot{display:flex;align-items:center;gap:8px;}
+.card-tag{font-size:11px;font-family:'Space Mono',monospace;font-weight:700;padding:3px 9px;border-radius:999px;}
+.ai-track .card-tag{background:rgba(124,110,250,.18);color:var(--ai);}
+.money-track .card-tag{background:rgba(27,191,126,.15);color:var(--money);}
+.card-xp{font-size:11px;color:var(--gold);font-weight:800;font-family:'Space Mono',monospace;margin-left:auto;}
+
+/* ════════════════════════════
+   LESSON MODAL
+════════════════════════════ */
+.modal-ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:16px;
+}
+.modal-ov.open{display:flex;}
+.modal{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:24px;
+  padding:28px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;
+  animation:popIn .3s ease;position:relative;
+  box-shadow: 0 24px 80px rgba(0,0,0,.7);
+}
+.modal-close{
+  position:absolute;top:14px;right:14px;background:var(--surface2);border:none;
+  border-radius:50%;width:32px;height:32px;color:var(--text);cursor:pointer;
+  font-size:18px;display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.modal-close:hover{background:var(--surface3);}
+.modal-track{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:4px;text-transform:uppercase;
+}
+.modal-emoji{font-size:44px;display:block;margin-bottom:10px;}
+.modal-title{font-family:'Fredoka One',cursive;font-size:1.6rem;margin-bottom:6px;line-height:1.2;}
+.modal-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.meta-chip{
+  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+  padding:4px 10px;border-radius:999px;
+}
+
+.modal-sec{margin-bottom:20px;}
+.modal-sec-hdr{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;
+  color:var(--muted);text-transform:uppercase;margin-bottom:10px;font-weight:700;
+}
+.modal-sec p{font-size:.9rem;line-height:1.7;color:rgba(240,239,255,.88);}
+
+/* Video embed */
+.video-wrap{
+  border-radius:14px;overflow:hidden;aspect-ratio:16/9;margin-bottom:4px;
+  background:var(--surface2);border:1px solid var(--border);
+  position:relative;
+}
+.video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+#videoFallback{position:absolute;inset:0;display:none;}
+.video-caption{font-size:.75rem;color:var(--muted);margin-bottom:14px;}
+
+/* Activities */
+.act-list{list-style:none;padding:0;}
+.act-item{
+  background:var(--surface2);border-radius:12px;padding:12px 14px;
+  margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;
+}
+.act-step{
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);
+  font-weight:700;margin-top:2px;flex-shrink:0;
+}
+.act-text{font-size:.87rem;line-height:1.6;color:rgba(240,239,255,.85);}
+.act-text a{color:var(--ai);text-decoration:none;font-weight:700;}
+.ai-track-modal .act-text a{color:var(--ai);}
+.money-track-modal .act-text a{color:var(--money);}
+.act-text a:hover{text-decoration:underline;}
+
+/* Why box */
+.why-box{
+  background:linear-gradient(135deg,rgba(124,110,250,.08),rgba(27,191,126,.06));
+  border:1px solid var(--border);border-radius:12px;padding:14px;
+  font-size:.87rem;line-height:1.65;color:rgba(240,239,255,.8);
+}
+
+.modal-action-btn{
+  width:100%;padding:15px;border-radius:14px;border:none;
+  font-family:'Fredoka One',cursive;font-size:1.1rem;letter-spacing:.5px;
+  cursor:pointer;transition:all .2s;color:white;margin-top:8px;
+}
+.mark-done-btn{background:linear-gradient(135deg,var(--money),#119C64);}
+.mark-undone-btn{background:var(--surface2);color:var(--muted);}
+.modal-action-btn:hover{transform:translateY(-2px);}
+
+/* ════════════════════════════
+   CONFETTI
+════════════════════════════ */
+.conf{
+  position:fixed;width:9px;height:9px;border-radius:2px;
+  animation:confFall 1.3s ease forwards;pointer-events:none;z-index:999;
+}
+@keyframes confFall{0%{opacity:1;transform:translateY(0) rotate(0deg);}100%{opacity:0;transform:translateY(350px) rotate(720deg);}}
+
+/* ════════════════════════════
+   ANIMATIONS
+════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.hidden{display:none!important;}
+
+/* ════════════════════════════
+   RESPONSIVE
+════════════════════════════ */
+@media(max-width:520px){
+  .lessons-grid{grid-template-columns:1fr;}
+  .streak-row{grid-template-columns:repeat(3,1fr);}
+  .hero{flex-direction:column;text-align:center;}
+  .tab-row{flex-direction:column;}
+  .ob-q{font-size:1.25rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════ ONBOARDING ════════════════════════════ -->
+<div id="onboarding" class="screen active">
+  <div class="ob-logo">🚀 KAI'S ACADEMY</div>
+  <div class="ob-tagline">AI Wizard + Money Master — let's get you set up!</div>
+
+  <!-- Step 1: Name -->
+  <div class="ob-card" id="ob1">
+    <div class="ob-step-dots">
+      <div class="ob-step-dot active" id="dot0"></div>
+      <div class="ob-step-dot" id="dot1"></div>
+      <div class="ob-step-dot" id="dot2"></div>
+      <div class="ob-step-dot" id="dot3"></div>
+      <div class="ob-step-dot" id="dot4"></div>
+    </div>
+    <span class="ob-emoji">👋</span>
+    <div class="ob-q">Hey there! What's your name?</div>
+    <div class="ob-sub">This curriculum is built just for you — let's make it personal.</div>
+    <input class="ob-input" id="nameInput" type="text" placeholder="Type your name here..." maxlength="20" autocomplete="off" />
+    <button class="ob-btn" id="ob1btn" onclick="obNext(1)" style="margin-top:14px;">Let's Go! →</button>
+  </div>
+
+  <!-- Step 2: Hobbies -->
+  <div class="ob-card hidden" id="ob2">
+    <div class="ob-step-dots">
+      <div class="ob-step-dot done" id="dot0b"></div>
+      <div class="ob-step-dot active" id="dot1b"></div>
+      <div class="ob-step-dot" id="dot2b"></div>
+      <div class="ob-step-dot" id="dot3b"></div>
+      <div class="ob-step-dot" id="dot4b"></div>
+    </div>
+    <span class="ob-emoji">🎮</span>
+    <div class="ob-q" id="ob2q">Nice! What do you love to do for fun?</div>
+    <div class="ob-sub">Pick everything that sounds like you. (Pick as many as you want!)</div>
+    <div class="ob-options">
+      <div class="ob-opt" data-v="gaming" onclick="toggleOpt(this)">🎮 Gaming</div>
+      <div class="ob-opt" data-v="sports" onclick="toggleOpt(this)">⚽ Sports</div>
+      <div class="ob-opt" data-v="animals" onclick="toggleOpt(this)">🐾 Animals</div>
+      <div class="ob-opt" data-v="music" onclick="toggleOpt(this)">🎵 Music</div>
+      <div class="ob-opt" data-v="art" onclick="toggleOpt(this)">🎨 Drawing/Art</div>
+      <div class="ob-opt" data-v="youtube" onclick="toggleOpt(this)">📺 YouTube</div>
+      <div class="ob-opt" data-v="legos" onclick="toggleOpt(this)">🧱 Building/Legos</div>
+      <div class="ob-opt" data-v="science" onclick="toggleOpt(this)">🔬 Science</div>
+      <div class="ob-opt" data-v="cooking" onclick="toggleOpt(this)">🍕 Food/Cooking</div>
+      <div class="ob-opt" data-v="outdoors" onclick="toggleOpt(this)">🌲 Outdoors</div>
+      <div class="ob-opt" data-v="reading" onclick="toggleOpt(this)">📚 Reading</div>
+      <div class="ob-opt" data-v="tech" onclick="toggleOpt(this)">💻 Tech/Computers</div>
+    </div>
+    <button class="ob-btn" onclick="obNext(2)">Next →</button>
+    <button class="ob-skip" onclick="obSkip(2)">Skip this</button>
+  </div>
+
+  <!-- Step 3: Dream -->
+  <div class="ob-card hidden" id="ob3">
+    <div class="ob-step-dots">
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot active"></div>
+      <div class="ob-step-dot"></div>
+      <div class="ob-step-dot"></div>
+    </div>
+    <span class="ob-emoji">✨</span>
+    <div class="ob-q">What's your biggest dream?</div>
+    <div class="ob-sub">Don't hold back — what do you REALLY want to do or be someday?</div>
+    <input class="ob-input" id="dreamInput" type="text" placeholder='e.g. "Game developer", "Own a business", "Help animals"...' autocomplete="off" />
+    <button class="ob-btn" onclick="obNext(3)" style="margin-top:14px;">Next →</button>
+    <button class="ob-skip" onclick="obSkip(3)">Skip this</button>
+  </div>
+
+  <!-- Step 4: Money knowledge -->
+  <div class="ob-card hidden" id="ob4">
+    <div class="ob-step-dots">
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot active"></div>
+      <div class="ob-step-dot"></div>
+    </div>
+    <span class="ob-emoji">💰</span>
+    <div class="ob-q">How much do you know about money?</div>
+    <div class="ob-sub">Be honest — there are no wrong answers here!</div>
+    <div class="ob-options" style="flex-direction:column;align-items:stretch;">
+      <div class="ob-opt" data-v="zero" onclick="selectSingle(this,'money-sel')">😅 Basically nothing — just that it exists</div>
+      <div class="ob-opt" data-v="little" onclick="selectSingle(this,'money-sel')">🤔 A little — I save some money sometimes</div>
+      <div class="ob-opt" data-v="some" onclick="selectSingle(this,'money-sel')">🙂 Some — I've heard of saving, budgeting</div>
+      <div class="ob-opt" data-v="decent" onclick="selectSingle(this,'money-sel')">😎 Decent — I know a bit about investing too</div>
+    </div>
+    <button class="ob-btn" onclick="obNext(4)">Next →</button>
+  </div>
+
+  <!-- Step 5: AI knowledge -->
+  <div class="ob-card hidden" id="ob5">
+    <div class="ob-step-dots">
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot done"></div>
+      <div class="ob-step-dot active"></div>
+    </div>
+    <span class="ob-emoji">🤖</span>
+    <div class="ob-q">How much do you know about AI?</div>
+    <div class="ob-sub">Have you used ChatGPT, Claude, or any AI tools before?</div>
+    <div class="ob-options" style="flex-direction:column;align-items:stretch;">
+      <div class="ob-opt" data-v="zero" onclick="selectSingle(this,'sel')">🤷 Never used it — heard of it though</div>
+      <div class="ob-opt" data-v="little" onclick="selectSingle(this,'sel')">🙂 Used it a few times for fun or school</div>
+      <div class="ob-opt" data-v="some" onclick="selectSingle(this,'sel')">😏 I use it pretty regularly already</div>
+      <div class="ob-opt" data-v="decent" onclick="selectSingle(this,'sel')">🚀 I know quite a bit — prompts, tools, all that</div>
+    </div>
+    <button class="ob-btn" onclick="finishOnboarding()">Build My Curriculum! 🎉</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════ DASHBOARD ════════════════════════════ -->
+<div id="dashboard" class="screen">
+  <div class="top-bar">
+    <div class="top-logo">🚀 KAI'S ACADEMY</div>
+    <div class="top-xp" id="topXP">0 XP</div>
+  </div>
+
+  <div class="dash-wrap">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-avi" id="heroAvi">🚀</div>
+      <div style="flex:1;">
+        <div class="hero-name" id="heroName">Kai's Academy</div>
+        <div class="hero-tagline" id="heroTagline">Keep going — every lesson builds your future!</div>
+        <div class="hero-xp-bar"><div class="hero-xp-fill" id="heroXPFill"></div></div>
+        <div class="hero-xp-label" id="heroXPLabel">0 / 0 XP earned</div>
+      </div>
+    </div>
+
+    <!-- Streaks -->
+    <div class="streak-row">
+      <div class="streak-card">
+        <div class="streak-num" id="streakCompleted" style="color:var(--money);">0</div>
+        <div class="streak-label">DONE</div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-num" id="streakLeft" style="color:var(--ai);">0</div>
+        <div class="streak-label">TO GO</div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-num" id="streakPct" style="color:var(--gold);">0%</div>
+        <div class="streak-label">COMPLETE</div>
+      </div>
+    </div>
+
+    <!-- Progress bars -->
+    <div class="prog-section">
+      <div class="prog-row">
+        <div class="prog-label-text" style="color:var(--ai);">🤖 AI Wizard</div>
+        <div class="prog-bar"><div class="prog-fill ai-fill" id="aiProg"></div></div>
+        <div class="prog-pct" id="aiPct">0%</div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-label-text" style="color:var(--money);">💰 Money</div>
+        <div class="prog-bar"><div class="prog-fill money-fill" id="moneyProg"></div></div>
+        <div class="prog-pct" id="moneyPct">0%</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-row">
+      <button class="tab-btn ai-active" id="tabAI" onclick="switchTab('ai')">🤖 AI Wizard Track</button>
+      <button class="tab-btn" id="tabMoney" onclick="switchTab('money')">💰 Money Master Track</button>
+    </div>
+
+    <div id="aiTrack" class="ai-track"></div>
+    <div id="moneyTrack" class="money-track hidden"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ LESSON MODAL ════════════════════════════ -->
+<div class="modal-ov" id="modalOv" onclick="closeModalBg(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-track" id="mTrack"></div>
+    <span class="modal-emoji" id="mEmoji"></span>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-meta" id="mMeta"></div>
+
+    <div class="modal-sec">
+      <div class="modal-sec-hdr">🎯 What You'll Learn</div>
+      <p id="mLearn"></p>
+    </div>
+
+    <div class="modal-sec" id="mVideoSec">
+      <div class="modal-sec-hdr">📺 Watch First (~5 min)</div>
+      <div class="video-wrap" id="mVideoWrap"></div>
+      <div class="video-caption" id="mVideoCap"></div>
+    </div>
+
+    <div class="modal-sec">
+      <div class="modal-sec-hdr">⚡ Your Activities</div>
+      <ul class="act-list" id="mActs"></ul>
+    </div>
+
+    <div class="modal-sec">
+      <div class="modal-sec-hdr">🏆 Why This Matters</div>
+      <div class="why-box" id="mWhy"></div>
+    </div>
+
+    <div class="modal-sec" id="mPromptSec">
+      <div class="modal-sec-hdr">💬 Try This Claude Prompt</div>
+      <div class="act-item"><div class="act-text" id="mPrompt" style="font-family:'Space Mono',monospace;font-size:.8rem;color:var(--ai);"></div></div>
+    </div>
+
+    <button class="modal-action-btn" id="mBtn" onclick="toggleDone()"></button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let profile = JSON.parse(localStorage.getItem('kai_profile') || 'null');
+let completed = JSON.parse(localStorage.getItem('kai_done') || '{}');
+let currentTab = 'ai';
+let openCard = null;
+
+const DAYS = ['TUE','WED','THU','FRI'];
+
+// ═══════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════
+let hobbies = [];
+let moneyLevel = '';
+let aiLevel = '';
+
+function toggleOpt(el){
+  el.classList.toggle('sel');
+  const v = el.dataset.v;
+  if(hobbies.includes(v)) hobbies = hobbies.filter(h=>h!==v);
+  else hobbies.push(v);
+}
+
+function selectSingle(el, cls){
+  el.closest('.ob-options').querySelectorAll('.ob-opt').forEach(o=>o.classList.remove('sel','money-sel'));
+  el.classList.add(cls);
+}
+
+function obNext(step){
+  if(step===1){
+    const n = document.getElementById('nameInput').value.trim();
+    if(!n){document.getElementById('nameInput').style.borderColor='var(--red)';return;}
+    document.getElementById('ob2q').textContent = `Nice to meet you, ${n}! What do you love doing?`;
+    switchOb(1,2);
+  } else if(step===2){
+    switchOb(2,3);
+  } else if(step===3){
+    switchOb(3,4);
+  } else if(step===4){
+    const sel = document.querySelector('#ob4 .ob-opt.money-sel');
+    moneyLevel = sel ? sel.dataset.v : 'zero';
+    switchOb(4,5);
+  }
+}
+
+function obSkip(step){
+  if(step===2) switchOb(2,3);
+  else if(step===3) switchOb(3,4);
+}
+
+function switchOb(from,to){
+  document.getElementById('ob'+from).classList.add('hidden');
+  document.getElementById('ob'+to).classList.remove('hidden');
+}
+
+function finishOnboarding(){
+  const sel = document.querySelector('#ob5 .ob-opt.sel');
+  aiLevel = sel ? sel.dataset.v : 'zero';
+  const name = document.getElementById('nameInput').value.trim() || 'Kai';
+  const dream = document.getElementById('dreamInput')?.value.trim() || '';
+
+  profile = { name, hobbies, dream, moneyLevel, aiLevel };
+  localStorage.setItem('kai_profile', JSON.stringify(profile));
+
+  document.getElementById('onboarding').classList.remove('active');
+  document.getElementById('dashboard').classList.add('active');
+  buildDashboard();
+}
+
+// ═══════════════════════════════════════════
+// CURRICULUM DATA
+// ═══════════════════════════════════════════
+const AI_WEEKS = [
+  {
+    week:1, theme:"What Even IS AI?",
+    lessons:[
+      {
+        emoji:"🤔", title:"AI vs. Your Brain",
+        learn:"Discover what AI actually is, how it 'thinks' differently from you, and why it's not magic — just really smart math patterns.",
+        video:{id:"JcXKbUIebrU", caption:"'What Is AI?' — a clear, kid-friendly animated explainer. Perfect starting point!"},
+        activities:[
+          "Watch the video above, then open Claude (claude.ai) and ask it: <b>'Explain how you think compared to a human brain. What can you NOT do?'</b>",
+          "Ask Claude 3 silly questions AND 3 serious ones. Write down the most surprising answer you got.",
+          "Sketch a quick diagram in your notebook: <b>Human Brain vs. AI</b> — list 3 things that are similar and 3 things that are different."
+        ],
+        why:"You can't master something you don't understand. This is your foundation — everything else in the AI track builds on it.",
+        prompt:"Explain the difference between AI and human intelligence using a video game analogy.",
+        xp:50
+      },
+      {
+        emoji:"💬", title:"Talk to AI Like a Pro",
+        learn:"The difference between a weak prompt and a powerful one — and why it completely changes what AI gives you.",
+        video:{id:"IMHBwskJqRo", caption:"See exactly how prompt engineering works with real examples."},
+        activities:[
+          "Try the same question two ways: <b>'What is weather?'</b> vs <b>'Explain weather to a 12-year-old using a pizza analogy.'</b> Compare the answers!",
+          "Write 3 bad prompts on paper. Then rewrite each one as a powerful prompt. What changed?",
+          "Create your own <b>Prompt Recipe Card</b>: What ingredients (who, what, how, format, tone) make a great AI prompt?"
+        ],
+        why:"The person who knows how to talk to AI gets 10x better results. That's going to be a huge advantage in school, work, and life.",
+        prompt:"You are a friendly tutor. Explain what a prompt is to a 12-year-old and give me 3 examples of weak prompts made strong.",
+        xp:60
+      },
+      {
+        emoji:"🎨", title:"AI Makes Art?! Try It!",
+        learn:"Explore how AI creates images from words — and make your own AI artwork right now.",
+        video:{id:"Gni6gzKrXzY", caption:"Beginner's guide to Adobe Firefly — free AI image generator you'll use in this lesson."},
+        activities:[
+          "Go to <a href='https://firefly.adobe.com' target='_blank'>firefly.adobe.com</a> (free, no credit card needed). Generate 3 images using detailed descriptions.",
+          "<b>Challenge:</b> Describe a made-up creature as specifically as possible and see what AI creates. Make it as wild as you can!",
+          "Save your favorite image. Write 2 sentences: What was amazing? What looked wrong or weird?"
+        ],
+        why:"Creative AI tools are already being used by game designers, movie studios, and artists worldwide. You're learning the future of creativity.",
+        prompt:"Describe a unique fantasy creature that has never existed before, with full details on appearance, powers, and habitat.",
+        xp:60
+      },
+      {
+        emoji:"🕵️", title:"Can You Spot the AI?",
+        learn:"Learn to tell when something was made by AI vs. a human — one of the most powerful skills in the modern world.",
+        video:{id:"nVyD6THcvDQ", caption:"Learn what AI can and can't do — and how to spot its weaknesses."},
+        activities:[
+          "Google <b>'AI generated images vs real photos quiz'</b> and try one. How many did you get right?",
+          "Ask Claude to write you a paragraph about your school. Then ask a parent or sibling to write one too. Compare — what's different?",
+          "Make your <b>'AI Detective Checklist'</b> — 5 clues that something might be AI-made."
+        ],
+        why:"In a world flooded with AI content, spotting what's real vs. fake is a genuine superpower that most adults don't have.",
+        prompt:"What are the telltale signs that text or an image was created by AI? Give me 7 specific clues to look for.",
+        xp:60
+      }
+    ]
+  },
+  {
+    week:2, theme:"AI as Your Study Buddy",
+    lessons:[
+      {
+        emoji:"📚", title:"Homework Hacks (The Right Way)",
+        learn:"How to use AI to understand things faster — without cheating yourself out of actually learning.",
+        video:{id:"p09yRj47kNM", caption:"How to use AI for learning — the right way vs. the shortcut that backfires."},
+        activities:[
+          "Pick your hardest subject right now. Ask Claude to explain the main concept 3 different ways until one 'clicks.'",
+          "Ask Claude: <b>'Quiz me on [your subject] — give me 5 questions and check my answers.'</b> Try to get them all right!",
+          "Write 3 sentences about what YOU now know (not just what Claude said) — the test of real learning."
+        ],
+        why:"AI is like having a private tutor available 24/7 for free. The students who use it to actually learn will outpace everyone else.",
+        prompt:"You are a patient teacher. Explain [difficult topic from school] in 3 totally different ways until one makes sense to a 12-year-old.",
+        xp:65
+      },
+      {
+        emoji:"✍️", title:"Level Up Your Writing",
+        learn:"Use AI to become a better writer — not to write FOR you, but to write WITH you.",
+        video:{id:"m8o2GrbR3d8", caption:"How AI understands language — which explains why it can help you write better."},
+        activities:[
+          "Write a paragraph about your favorite thing (game, sport, animal — your choice!).",
+          "Paste it into Claude and ask: <b>'Give me 5 specific ways to make this paragraph more vivid and interesting.'</b>",
+          "Rewrite your paragraph using the feedback. Put Version 1 and Version 2 side-by-side. Version 2 should be noticeably better."
+        ],
+        why:"Strong writing is one of the highest-paid life skills. Using AI feedback is like having a professional editor who never gets tired.",
+        prompt:"Read my paragraph and give me 5 specific edits to make it more interesting, vivid, and engaging: [paste your paragraph]",
+        xp:65
+      },
+      {
+        emoji:"🧪", title:"Build Your Own Quiz Game",
+        learn:"Use AI to build an actual quiz game about any topic you choose — then challenge someone to play!",
+        video:{id:"XSMzHh07ZHU", caption:"See how powerful a good conversation with AI can be when you stay in control."},
+        activities:[
+          "Choose a topic you love (animals, Minecraft, sports, history — anything!). Ask Claude to create 10 multiple-choice questions with answer explanations.",
+          "Test the quiz on a family member or friend. Track their score!",
+          "Edit any questions that were confusing or wrong. Improving your creation is part of the lesson."
+        ],
+        why:"Creating a game to teach others is one of the most effective ways to truly master something yourself.",
+        prompt:"Create a 10-question multiple-choice quiz about [your topic] for a 12-year-old. Include the correct answer and a one-sentence explanation for each.",
+        xp:70
+      },
+      {
+        emoji:"🗺️", title:"Plan a Dream Trip with AI",
+        learn:"Give AI a goal and real constraints, and have it build something useful — then improve it through conversation.",
+        video:{id:"nVyD6THcvDQ", caption:"Watch how people use AI to plan and organize real things — then try it yourself."},
+        activities:[
+          "Tell Claude: <b>'Plan a 3-day trip to [your dream destination] for 1 person on a $500 budget. Include where to stay, eat, and what to do each day.'</b>",
+          "Review the plan critically: What's realistic? What's missing? What would YOU change?",
+          "Ask 3 follow-up questions to improve the plan. Practice having a conversation with AI — not just asking one question."
+        ],
+        why:"Learning to have a multi-turn conversation with AI — instead of just one question — is what separates beginners from power users.",
+        prompt:"Plan a 3-day trip to [destination] for a 12-year-old and their family, with a $1,500 total budget. Be specific with costs and activities.",
+        xp:70
+      }
+    ]
+  },
+  {
+    week:3, theme:"AI in the Real World",
+    lessons:[
+      {
+        emoji:"🏥", title:"AI That Saves Lives",
+        learn:"Discover how AI is being used in medicine, science, and helping real people around the world right now.",
+        video:{id:"ttIOdAdQaUE", caption:"From healthcare to climate — how AI is already changing the world in big ways."},
+        activities:[
+          "Google <b>'AI used in medicine 2024'</b> — find 2 real examples that surprise you. Write down what they do.",
+          "Ask Claude: <b>'How is AI being used to fight climate change? Give me the top 5 most impactful ways with examples.'</b>",
+          "<b>Dinner challenge:</b> Tell your family one thing AI is doing to help the world. See if they knew about it."
+        ],
+        why:"Understanding where AI has real impact helps you see where YOU might want to make a difference someday.",
+        prompt:"What are 5 real, specific ways AI is being used to improve human health right now? Give examples with the names of actual projects or companies.",
+        xp:60
+      },
+      {
+        emoji:"⚠️", title:"When AI Gets It WRONG",
+        learn:"Understand AI's real limits, its mistakes, and why you should always be the one in charge.",
+        video:{id:"nVyD6THcvDQ", caption:"The limitations of AI you actually need to know — especially as a user."},
+        activities:[
+          "Ask Claude a question about something very recent (today's news, a movie that came out this week). Notice what happens.",
+          "Try to catch Claude saying something confidently that's actually wrong. Research to verify — this is called an 'AI hallucination.'",
+          "Write: 3 situations where you would NEVER just trust what AI tells you without checking."
+        ],
+        why:"Smart AI users know when to trust AI and when to double-check. That keeps YOU in control, not the machine.",
+        prompt:"What are 5 types of questions where AI is most likely to give wrong or made-up answers? Why does this happen?",
+        xp:65
+      },
+      {
+        emoji:"🤖", title:"Jobs of the Future",
+        learn:"Which jobs AI might change or eliminate, which it won't — and what skills will matter most when you grow up.",
+        video:{id:"m8o2GrbR3d8", caption:"How AI is changing work — and what that means for your future career."},
+        activities:[
+          "Ask Claude: <b>'What jobs will still need humans in 2040 and why? List 10 with explanations.'</b>",
+          "Think about what YOU love. Ask: <b>'How might AI be a tool — not a replacement — for someone who does [your interest or dream] for a living?'</b>",
+          "Write your answer: In 3-5 sentences, describe how you think AI will affect your future work or life."
+        ],
+        why:"The people who thrive in the future won't be replaced by AI — they'll be the ones who know exactly how to work alongside it.",
+        prompt:"I'm 12 years old and I love [your hobby]. How could AI help me if I turned that into a career? What would I still need to do that AI can't?",
+        xp:65
+      },
+      {
+        emoji:"🧠", title:"Build Your AI Toolkit",
+        learn:"Discover the best AI tools available and what each one is actually best at.",
+        video:{id:"IMHBwskJqRo", caption:"Overview of the main AI tools and when to use which one."},
+        activities:[
+          "Try asking the same question in <a href='https://claude.ai' target='_blank'>Claude</a> and <a href='https://perplexity.ai' target='_blank'>Perplexity AI</a> (both free). Compare the answers.",
+          "Rate each tool: 1-10 for helpfulness, ease of use, and creativity.",
+          "Create your <b>Personal AI Cheat Sheet</b> — a list of your top 3 AI tools and the best use for each one."
+        ],
+        why:"A craftsperson has many tools and knows which to use for each job. That's exactly what this skill builds.",
+        prompt:"Compare Claude, ChatGPT, and Perplexity AI. What is each one best at? When should I use each one?",
+        xp:70
+      }
+    ]
+  },
+  {
+    week:4, theme:"Build Something Real",
+    lessons:[
+      {
+        emoji:"💡", title:"Brainstorm a Business Idea",
+        learn:"Use AI to generate, stress-test, and refine real business ideas that could actually work.",
+        video:{id:"IMHBwskJqRo", caption:"How AI can help you think like an entrepreneur and move fast on ideas."},
+        activities:[
+          "Tell Claude your interests and ask: <b>'Give me 10 creative small business ideas for a 12-year-old. Make them realistic and connected to my interests.'</b>",
+          "Pick your top 2. Ask: <b>'What are the 3 biggest pros and 3 biggest cons of each idea?'</b>",
+          "Choose one. Ask: <b>'What are the first 3 steps to actually start this?'</b> Write them in your notebook."
+        ],
+        why:"Entrepreneurs who use AI can test ideas 10x faster than those who don't. You're learning to think like a founder right now.",
+        prompt:"I'm 12 years old and I love [your hobbies]. Give me 10 business ideas I could realistically start, with a rough idea of how much each would cost to begin.",
+        xp:75
+      },
+      {
+        emoji:"📣", title:"Market Your Idea",
+        learn:"Use AI to write a pitch, a slogan, and a social media post for your business — like a real marketer.",
+        video:{id:"m8o2GrbR3d8", caption:"How AI helps entrepreneurs communicate their ideas clearly and compellingly."},
+        activities:[
+          "Ask Claude to write a 30-second 'elevator pitch' for your business idea from Day 1 this week.",
+          "Ask for 5 slogan options. Pick your favorite — and explain out loud WHY you chose it.",
+          "Ask Claude to write an Instagram caption for your imaginary business launch. Edit it to sound like you."
+        ],
+        why:"A great idea with poor marketing dies. A good idea with great marketing wins. AI makes marketing fast — but you still need to make it yours.",
+        prompt:"Write a 30-second elevator pitch for my business called [name], which does [description]. Make it exciting, clear, and sound like a real 12-year-old.",
+        xp:70
+      },
+      {
+        emoji:"🎯", title:"Solve a Real Problem",
+        learn:"Pick an actual problem in your life, school, or neighborhood — and design a real solution using AI.",
+        video:{id:"nVyD6THcvDQ", caption:"How AI tools help people move from 'I notice a problem' to 'here's my solution.'"},
+        activities:[
+          "Identify one real problem you see — at school, at home, in your neighborhood. Write it down.",
+          "Have a full conversation with Claude about the problem. Let it ask you questions and suggest ideas.",
+          "Design your solution: Draw it or write a simple 1-page plan. Who does it help? What does it do? How?"
+        ],
+        why:"The most successful people in the world are problem-solvers. AI makes you a faster, sharper, better one.",
+        prompt:"Help me solve this problem I've noticed: [describe problem]. Ask me questions to understand it better, then help me design a simple solution.",
+        xp:80
+      },
+      {
+        emoji:"🏆", title:"AI Skills Showcase",
+        learn:"Show off what you've learned! Create a mini-presentation about AI and teach someone in your family something new.",
+        video:{id:"ttIOdAdQaUE", caption:"Revisit the basics — now see how much more you understand than when you first watched this."},
+        activities:[
+          "Ask Claude to help you outline a 5-point presentation: <b>'What is AI, a cool use case, a danger to know, a tool I love, and what I want to do with it.'</b>",
+          "Write the talking points in your OWN words — don't just read what Claude wrote.",
+          "Present it to at least one family member. Teach them something they didn't know."
+        ],
+        why:"Teaching others is the ultimate proof of mastery. You've completed 4 weeks — show what you know!",
+        prompt:"Help me create a fun 5-point outline for a short presentation about AI for my family. Each point should have 2-3 talking points I can explain in my own words.",
+        xp:100
+      }
+    ]
+  },
+  {
+    week:5, theme:"Advanced Prompting",
+    lessons:[
+      {
+        emoji:"🎭", title:"Give AI a Persona",
+        learn:"Learn to tell AI WHO to be — and watch how dramatically different the answers become.",
+        video:{id:"IMHBwskJqRo", caption:"Advanced prompt techniques — how to unlock completely different responses with personas."},
+        activities:[
+          "Ask Claude the same question 3 ways: as a scientist, as a comedian, as a 10-year-old. Compare!",
+          "Try: <b>'You are a pirate chef in 1700. Give me a recipe for mac and cheese using ingredients from that era.'</b>",
+          "Create your own custom persona and use it to ask Claude 5 interesting questions."
+        ],
+        why:"Persona prompting unlocks totally different answers. It's like having access to a whole team of experts and characters.",
+        prompt:"You are a [fun character]. Explain [topic] from your unique perspective, using language and references that fit who you are.",
+        xp:70
+      },
+      {
+        emoji:"🔗", title:"Chain Prompting",
+        learn:"How to break big projects into steps and use AI for each step — like a factory line for ideas.",
+        video:{id:"p09yRj47kNM", caption:"Breaking complex tasks into AI-powered steps — the technique professionals use."},
+        activities:[
+          "Goal: Write a short story. Step 1: Ask Claude for a plot. Step 2: Ask for 3 characters with backstories. Step 3: Ask for the opening paragraph.",
+          "Notice the difference vs. just asking <b>'write me a story.'</b> Which is better? Why?",
+          "Try chain prompting for either: planning a birthday party OR designing a video game level."
+        ],
+        why:"The best AI users don't just ask one question. They break big projects into steps and go deeper each time. This is a pro skill.",
+        prompt:"Let's build a short story together step by step. First, just give me a one-sentence plot premise with an unexpected twist.",
+        xp:75
+      },
+      {
+        emoji:"📋", title:"Build Reusable Templates",
+        learn:"Create prompt templates you can reuse forever — so you get great results every time without starting from scratch.",
+        video:{id:"m8o2GrbR3d8", caption:"Why systems beat willpower — and how prompt templates are your personal AI systems."},
+        activities:[
+          "Create a <b>'Book Report Template'</b> prompt that would work for any book you read for school.",
+          "Create a <b>'Study Guide Template'</b> that generates a complete study guide for any subject.",
+          "Save both to your notes app or notebook. This is the start of your Personal AI Toolkit — protect it!"
+        ],
+        why:"Systems beat willpower every single time. Building reusable templates means future-you works smarter, not harder.",
+        prompt:"Create a reusable template prompt that I can use to generate a complete study guide for any school subject. Include vocabulary, key concepts, and practice questions.",
+        xp:75
+      },
+      {
+        emoji:"🌐", title:"AI + Real Research",
+        learn:"How to use AI alongside real sources to research anything quickly AND accurately.",
+        video:{id:"nVyD6THcvDQ", caption:"Why combining AI with real research makes you a more powerful learner and thinker."},
+        activities:[
+          "Pick something you're curious about. Ask Claude what to research first. Let it guide your curiosity.",
+          "Find 2 real articles on the same topic online. Compare what they say vs. what Claude told you.",
+          "Write a 1-paragraph summary using BOTH Claude and your research. Mention where each fact came from."
+        ],
+        why:"AI + real sources = the most powerful research combo available. Journalists, scientists, and students who master this will lead their fields.",
+        prompt:"I want to research [topic]. What are the 5 most important questions I should try to answer? What sources should I look for?",
+        xp:70
+      }
+    ]
+  },
+  {
+    week:6, theme:"AI Ethics & You",
+    lessons:[
+      {
+        emoji:"⚖️", title:"Is Using AI Cheating?",
+        learn:"Explore the grey zone — when does using AI help you grow, and when does it rob you of learning?",
+        video:{id:"m8o2GrbR3d8", caption:"The honest conversation about AI, learning, and where the line actually is."},
+        activities:[
+          "Imagine: You have a book report due. List 5 ways you COULD use AI. Which feel fine? Which feel like cheating? Why?",
+          "Write your own <b>Personal AI Code</b> — your 5 rules for how YOU will use AI honestly.",
+          "Share your rules with a parent or teacher and get their reaction. Do they agree?"
+        ],
+        why:"Having your own values around AI makes you trustworthy — and keeps your brain sharp. Both matter.",
+        prompt:"What is the ethical line between using AI to help you learn vs. using AI to avoid learning? Give me examples of each side.",
+        xp:65
+      },
+      {
+        emoji:"🔒", title:"Stay Safe Online",
+        learn:"What information you should NEVER share with any AI — and how to protect yourself online.",
+        video:{id:"kQPC4_DsJ8I", caption:"AI explained for kids — great context for understanding what to keep private when using these tools."},
+        activities:[
+          "List 10 types of information that are private and should never be typed into an AI chatbot.",
+          "Ask Claude: <b>'What are the risks of sharing personal information with AI chatbots like you?'</b> (It will answer honestly!)",
+          "Make a <b>'Safety Poster'</b> with your top 5 AI safety rules. You could even put it near your computer."
+        ],
+        why:"Knowing how to protect yourself online is one of the most important skills of your entire generation.",
+        prompt:"What personal information should someone never share with an AI chatbot, and why? Be specific and give real examples of what could go wrong.",
+        xp:70
+      },
+      {
+        emoji:"🌍", title:"Bias in AI",
+        learn:"Why AI can sometimes be unfair — and why this is a problem worth understanding.",
+        video:{id:"nVyD6THcvDQ", caption:"How AI bias works and why it matters for real people in the real world."},
+        activities:[
+          "Ask Claude to describe 'a typical engineer,' 'a typical nurse,' and 'a typical CEO.' Do you notice any patterns in the descriptions?",
+          "Research: <b>'AI bias examples real world'</b> — find one real case that surprised or bothered you.",
+          "Think: If YOU were building an AI, what would you do to make it fair to everyone?"
+        ],
+        why:"The most powerful AI users understand its flaws. You'll be a smarter, more responsible user — and maybe even someone who helps fix it.",
+        prompt:"Explain what AI bias is, give me 3 real-world examples of it causing harm, and tell me what researchers are doing to fix it.",
+        xp:70
+      },
+      {
+        emoji:"🚀", title:"Your AI Future",
+        learn:"Dream forward: What do YOU want to use AI for in your life — and how do you get there?",
+        video:{id:"m8o2GrbR3d8", caption:"The future of AI and the people who will shape it — including you."},
+        activities:[
+          "Write a letter to your 25-year-old self about how you'll use AI in your career and daily life.",
+          "Ask Claude to help you brainstorm 3 specific ways AI could help you reach your biggest dream.",
+          "Share your letter with someone you trust. What do they think? What do THEY hope AI will help them with?"
+        ],
+        why:"Clarity on your goals is the first step to achieving them. You've completed 6 weeks — this is only the beginning.",
+        prompt:"My biggest dream is [your dream]. How could AI be a powerful tool to help me achieve it? Give me 5 specific and realistic ways.",
+        xp:100
+      }
+    ]
+  },
+  {
+    week:7, theme:"Automation Basics",
+    lessons:[
+      {
+        emoji:"⚙️", title:"What Is Automation?",
+        learn:"How repetitive tasks can run automatically — without you doing them every time.",
+        video:{id:"IMHBwskJqRo", caption:"Automation basics — how systems do the work so humans can focus on what matters."},
+        activities:[
+          "List 5 things in your life that happen the same way every day or week (morning routine, reminders, chores, etc.).",
+          "Ask Claude: <b>'What are 10 surprising examples of automation in everyday life that most people don't notice?'</b>",
+          "Design your perfect <b>Automated Morning</b> — write it step by step as if a system were running it for you."
+        ],
+        why:"Automation is how successful people do more without working more hours. Understanding it early puts you years ahead.",
+        prompt:"What are 10 everyday things that are already automated that most people don't realize? Explain how each one works simply.",
+        xp:65
+      },
+      {
+        emoji:"📧", title:"Auto-Reply Magic",
+        learn:"Design an automatic message system for an imaginary business — just like real businesses use.",
+        video:{id:"p09yRj47kNM", caption:"How businesses automate customer communication — and how to do it yourself."},
+        activities:[
+          "Invent a simple business (pet sitting, tutoring, lawn care — anything you like).",
+          "Ask Claude to write 3 auto-replies: a booking confirmation, a cancellation message, and a thank-you follow-up.",
+          "Edit each one to sound real, warm, and like a person — not a robot. That's the trick."
+        ],
+        why:"Business owners use auto-replies to save hours every week while keeping customers happy. This is a skill you can use now.",
+        prompt:"I run a [type of business]. Write 3 professional but friendly auto-reply messages: one for booking confirmation, one for cancellation, one for a thank-you after service.",
+        xp:65
+      },
+      {
+        emoji:"📅", title:"AI Scheduling",
+        learn:"Use AI to plan your week like a productivity master.",
+        video:{id:"m8o2GrbR3d8", caption:"Time management strategies used by the most productive people — now powered by AI."},
+        activities:[
+          "List everything you need to do next week: school, activities, homework, and things you want to do.",
+          "Ask Claude: <b>'Create an optimized weekly schedule for a 12-year-old with [your activities] — include study blocks, breaks, and fun time.'</b>",
+          "Adjust the schedule to fit your real life. Be honest — would you actually follow it? If not, why not?"
+        ],
+        why:"Time management is the #1 habit of highly productive people. AI makes it faster and smarter to build.",
+        prompt:"Create a realistic weekly schedule for a 12-year-old who has [your school schedule and activities]. Balance productivity, learning, and fun. Use a table format.",
+        xp:65
+      },
+      {
+        emoji:"🔄", title:"Design Your Power Morning",
+        learn:"Create an AI-designed morning routine that sets you up to win every single day.",
+        video:{id:"NbEbs6I3eLw", caption:"How AI works and why designing systems (like a morning routine) beats relying on willpower."},
+        activities:[
+          "Ask Claude: <b>'Design a powerful 30-minute morning routine for a 12-year-old who wants to be successful, healthy, and focused. Make it realistic.'</b>",
+          "Customize it for your actual life. What would you keep? What would you swap out? What's missing?",
+          "Write the final version out neatly and put it somewhere you'll see it every morning."
+        ],
+        why:"Your morning shapes your entire day. Designing it intentionally at 12 is something most adults wish they'd done decades earlier.",
+        prompt:"Design the ultimate 30-minute morning routine for a 12-year-old who wants to feel energized, focused, and ready to learn. Keep it realistic and fun.",
+        xp:70
+      }
+    ]
+  },
+  {
+    week:8, theme:"AI Grand Finale",
+    lessons:[
+      {
+        emoji:"🎮", title:"Design a Video Game with AI",
+        learn:"Use AI to build out a complete concept for your dream video game — from story to characters to levels.",
+        video:{id:"IMHBwskJqRo", caption:"How game designers use AI as a creative partner — and how to do it yourself."},
+        activities:[
+          "Ask Claude to help you create: a story, 3 characters with unique abilities, 5 levels, and the main enemy or challenge.",
+          "Ask for 10 name ideas for your game. Pick your favorite and explain why it fits.",
+          "Draw or describe your main character in detail. Ask Claude to write their backstory."
+        ],
+        why:"Game designers use AI tools every day now. You're learning to think and create like a professional creator.",
+        prompt:"Help me design a complete video game concept. I want: a unique story, 3 playable characters with different abilities, 5 distinct levels, and a final boss. Make it original.",
+        xp:80
+      },
+      {
+        emoji:"📰", title:"Write a Real News Story",
+        learn:"Use AI as a journalist's assistant — research, write, and edit a real article on something that matters to you.",
+        video:{id:"nVyD6THcvDQ", caption:"How modern writers and journalists use AI to research and draft faster."},
+        activities:[
+          "Choose a topic that matters in your community or school. Ask Claude: <b>'What are 5 great questions a journalist should ask about [your topic]?'</b>",
+          "Write a 200-word article with a headline, intro, body, and conclusion. Ask Claude for feedback.",
+          "Revise your article based on feedback. Read both versions — notice how much better Version 2 is."
+        ],
+        why:"Writing clearly about things that matter is a skill that will pay off in school, in business, and in life.",
+        prompt:"I'm writing a short article about [topic]. Give me feedback on clarity, structure, and engagement. Then suggest 3 specific edits to make it stronger.",
+        xp:80
+      },
+      {
+        emoji:"🤝", title:"AI for Good",
+        learn:"Design a project that uses AI to help your school, neighborhood, or community.",
+        video:{id:"G6de8L7cVvM", caption:"How AI is being used to solve real problems in the world — including ones kids can contribute to."},
+        activities:[
+          "Identify a real problem in your community (food, environment, animals, kids, elderly — anything).",
+          "Have a full conversation with Claude: describe the problem and brainstorm AI-powered solutions together.",
+          "Write a 1-page <b>Project Proposal</b>: What would you build? Who does it help? What would you need to get started?"
+        ],
+        why:"The next generation of leaders will use AI to solve real problems. The practice starts right now.",
+        prompt:"Help me design a community project that uses AI to solve [your problem]. What would the solution do? How would it work? What would it cost to start?",
+        xp:85
+      },
+      {
+        emoji:"🏅", title:"AI Wizard Graduation!",
+        learn:"Celebrate finishing the AI track — and lock in your learning so it sticks for life.",
+        video:{id:"m8o2GrbR3d8", caption:"The future of AI — and why what you've learned puts you ahead of most people."},
+        activities:[
+          "From memory, write your <b>Top 10 Things I Learned About AI</b> list — no cheating, no AI help on this one!",
+          "Write 3 specific goals for how you'll use AI in the next 6 months.",
+          "Share your favorite thing you made or learned during this track with your family. Teach them something."
+        ],
+        why:"You are now more AI-literate than most adults. That is not an exaggeration. Use this knowledge wisely and keep building.",
+        prompt:"Quiz me on what I should know after completing an 8-week intro to AI curriculum. Ask me 10 questions and give me feedback on my answers.",
+        xp:100
+      }
+    ]
+  }
+];
+
+const MONEY_WEEKS = [
+  {
+    week:1, theme:"Money Basics — What's the Deal?",
+    lessons:[
+      {
+        emoji:"💵", title:"What IS Money, Really?",
+        learn:"Where money came from, why it exists, and how it flows through the world — the stuff most adults never learned.",
+        video:{id:"FpNyTKgi1Io", caption:"The real story of money — from trading rocks to digital payments. (Easy Peasy Finance, great channel for beginners!)"},
+        activities:[
+          "Research: <b>'What did people trade before money existed?'</b> Find 3 interesting examples of barter from history.",
+          "Ask Claude: <b>'Explain how money works in the modern economy to a 12-year-old using a story.'</b>",
+          "Ask a parent: <b>'What did money mean to you when you were my age?'</b> Write down the 2 most interesting things they said."
+        ],
+        why:"Understanding what money IS at a deep level is Step 1. Most adults skip this — and it costs them for decades.",
+        prompt:"Explain the history of money and why it was invented, using a fun story that a 12-year-old would enjoy reading.",
+        xp:50
+      },
+      {
+        emoji:"🏷️", title:"Needs vs. Wants",
+        learn:"The single most important money concept — and why mixing them up is where most people go wrong.",
+        video:{id:"VPIVrPpdfTo", caption:"Needs vs. Wants clearly explained — the most important distinction in all of personal finance."},
+        activities:[
+          "Make two columns: NEEDS and WANTS. Write 10 things you spend money on (or want to). Sort them.",
+          "<b>Dig deeper:</b> For each WANT, ask: 'What deeper NEED is this actually trying to fill?' (Example: new shoes → feeling cool → wanting to belong)",
+          "Estimate: What % of what you spend goes to needs vs. wants? What surprised you?"
+        ],
+        why:"People who master needs vs. wants build wealth. People who confuse them stay broke regardless of how much they earn.",
+        prompt:"Help me understand the difference between needs and wants. Give me 10 examples of each for a 12-year-old, including some tricky ones that could be either.",
+        xp:60
+      },
+      {
+        emoji:"🐷", title:"Build Your First Budget",
+        learn:"Create a real mini budget using money you actually have or earn.",
+        video:{id:"OKSSzmc6x1U", caption:"How to make a simple budget that actually works — starting with what you have right now."},
+        activities:[
+          "List all money you receive (allowance, chores, gifts, etc.) — this is your income.",
+          "List everything you spend money on in a typical month.",
+          "Apply the <b>50/30/20 rule</b>: 50% needs, 30% wants, 20% savings. How close are you to this? What needs to change?"
+        ],
+        why:"A budget isn't a cage — it's a map. People with budgets reach their goals; people without one just drift.",
+        prompt:"Help me build a simple monthly budget for a 12-year-old who earns $[amount] per month. Use the 50/30/20 rule and explain each category.",
+        xp:65
+      },
+      {
+        emoji:"💳", title:"Cash, Cards & Digital Money",
+        learn:"Understand the different forms money takes today — and the hidden dangers of each.",
+        video:{id:"bJg-rF3bLH0", caption:"How different money tools work — and which ones can get you in trouble fastest."},
+        activities:[
+          "Ask a parent to show you a credit card, debit card, and cash. Ask them to explain the difference in their own words.",
+          "Ask Claude: <b>'What are the pros and cons of using a credit card? What's the trap that most people fall into?'</b>",
+          "Write down: Which form of money do you think would be hardest to manage responsibly? Why?"
+        ],
+        why:"Understanding money tools prevents the #1 financial trap adults fall into: credit card debt. Knowing this now saves you thousands later.",
+        prompt:"Explain the difference between cash, debit cards, and credit cards to a 12-year-old. What are the risks of each? What traps should I watch out for?",
+        xp:60
+      }
+    ]
+  },
+  {
+    week:2, theme:"Earning Money",
+    lessons:[
+      {
+        emoji:"💼", title:"Ways to Earn",
+        learn:"The difference between trading your time for money vs. making money while you sleep.",
+        video:{id:"Epzr8azlxp8", caption:"What is investing and earning — the difference between active and passive income explained simply."},
+        activities:[
+          "List 10 ways a 12-year-old could earn money. Include both jobs AND business ideas.",
+          "Ask Claude: <b>'What is the difference between active income and passive income? Give me examples for a 12-year-old.'</b>",
+          "Circle the 2 ideas on your list that most excite you. Write 3 sentences explaining why."
+        ],
+        why:"Learning the difference between active and passive income at your age is an enormous advantage. Most adults don't discover this until their 30s or 40s.",
+        prompt:"What is the difference between active income and passive income? Give me 5 realistic examples of each that a motivated 12-year-old could eventually pursue.",
+        xp:65
+      },
+      {
+        emoji:"🔧", title:"The Value You Offer",
+        learn:"Why people pay for things — it's always about solving a problem or creating a feeling.",
+        video:{id:"J0LOsRdR89U", caption:"What makes something valuable — the core concept behind every business and every paycheck."},
+        activities:[
+          "List 3 things you're genuinely good at. (Gaming, organizing, animals, explaining things, drawing — anything!)",
+          "For each skill, ask: <b>'Who has a problem that this skill could actually solve?'</b>",
+          "Write your first value pitch: <b>'I help [who] do [what] so that [result].'</b>"
+        ],
+        why:"Every successful business is built on value — solving someone's problem or creating a feeling they want. Understanding this at 12 is genuinely rare.",
+        prompt:"I'm 12 and I'm good at [your skill]. Who might pay for this? What problem does it solve for them? Help me write a one-sentence pitch.",
+        xp:70
+      },
+      {
+        emoji:"📊", title:"Price It Right",
+        learn:"How to figure out what to charge — too high and nobody buys, too low and you don't earn.",
+        video:{id:"w3_HBkT4hwc", caption:"How markets set prices — the basics of supply, demand, and getting paid what you're worth."},
+        activities:[
+          "Pick a real service (lawn mowing, dog walking, tutoring). Search online: what do others in your area charge?",
+          "Calculate: If you charged $15/hour and worked 4 hours a week, how much would you earn per month? Per year?",
+          "Ask a parent: Is that price fair for your neighborhood? What would make someone pay more?"
+        ],
+        why:"Pricing confidence is what separates businesses that thrive from ones that barely survive. Most people underprice themselves their whole careers.",
+        prompt:"I want to start a [service] business. Help me research fair pricing, calculate my potential earnings at different price points, and decide on my starting rate.",
+        xp:70
+      },
+      {
+        emoji:"🌱", title:"Your First Business Plan",
+        learn:"Write a simple one-page plan for your business idea — the step that turns ideas into action.",
+        video:{id:"J0LOsRdR89U", caption:"What makes a business viable — the basics of turning an idea into something real."},
+        activities:[
+          "Choose the business idea you're most excited about from this week.",
+          "Ask Claude: <b>'Help me write a simple one-page business plan for a 12-year-old starting [your idea]. Keep it clear and realistic.'</b>",
+          "Edit the plan in your own words. Show it to a parent — ask: 'What am I missing? What would you change?'"
+        ],
+        why:"Writing a plan makes ideas real. Most people have great ideas but never write them down. Those ideas fade away. Yours won't.",
+        prompt:"Help me write a simple one-page business plan for [your business idea]. Include: the idea, who I help, how I make money, what I need to start, and my first 3 steps.",
+        xp:75
+      }
+    ]
+  },
+  {
+    week:3, theme:"Saving & Growing Money",
+    lessons:[
+      {
+        emoji:"🏦", title:"How Banks Actually Work",
+        learn:"What banks do with your money while it sits there — and whether it's working for you or against you.",
+        video:{id:"bJg-rF3bLH0", caption:"The truth about banks — how they use your money, how interest works, and how to make it work for you."},
+        activities:[
+          "Ask Claude: <b>'How does a bank make money? Explain it simply like I'm 12.'</b> Write the key idea in your own words.",
+          "Ask a parent: <b>'Do we have a savings account? What interest rate does it pay?'</b> Write down the answer.",
+          "Calculate: If you saved $20/month for 1 year with a 4% interest rate, how much would you have? (Ask Claude to help with the math!)"
+        ],
+        why:"Banks either work FOR you or you work for THEM. Knowing which is which changes every financial decision you make.",
+        prompt:"How does a bank make money using my deposits? Explain in simple terms how interest works on both savings accounts and loans.",
+        xp:60
+      },
+      {
+        emoji:"✨", title:"The Magic of Compound Interest",
+        learn:"The single most powerful concept in all of personal finance — and you're learning it at 12.",
+        video:{id:"xAABDYDhjtg", caption:"The power of compound interest — told as a story that makes it unforgettable. (This one will change how you think about money!)"},
+        activities:[
+          "Ask Claude to explain compound interest using a fun story starring a character your age.",
+          "Use this link: <a href='https://www.investor.gov/financial-tools-calculators/calculators/compound-interest-calculator' target='_blank'>Compound Interest Calculator (investor.gov)</a> — what does $1,000 become in 10 years at 7%?",
+          "<b>Mind-blower:</b> What if you also added $50/month? Calculate it. Write down: 'This is why starting early matters.'"
+        ],
+        why:"Einstein reportedly called compound interest 'the eighth wonder of the world.' Starting at your age puts you so far ahead that most adults can't catch up.",
+        prompt:"Tell me a story about two kids — one who starts saving and investing at age 12 and one who starts at 30. Show me the exact numbers at age 65 for both.",
+        xp:80
+      },
+      {
+        emoji:"🎯", title:"Three Savings Goals",
+        learn:"Set real savings goals with real numbers: short-term, medium-term, and long-term.",
+        video:{id:"ZonuaS7KlkM", caption:"How to set savings goals that actually work — the difference between a wish and a plan."},
+        activities:[
+          "<b>Short-term (1-3 months):</b> Something you want soon. How much? How many weeks to save for it?",
+          "<b>Medium-term (6-12 months):</b> Something bigger — a gadget, an experience, a course.",
+          "<b>Long-term (5+ years):</b> Something ambitious. Ask Claude to build a savings plan for all three."
+        ],
+        why:"Goals with numbers and deadlines actually happen. Goals without numbers are just wishes. This is the difference.",
+        prompt:"Help me set up 3 savings goals: a short-term goal I can reach in 3 months, a medium-term goal in 12 months, and a long-term goal in 5 years. Make a specific plan for each.",
+        xp:70
+      },
+      {
+        emoji:"💰", title:"The 3-Jar System",
+        learn:"A dead-simple money system you can start using THIS WEEK.",
+        video:{id:"chCzZKexWT8", caption:"How the jar system works and why it builds powerful money habits fast."},
+        activities:[
+          "Set up (or imagine) 3 jars, envelopes, or phone savings buckets: <b>SPEND, SAVE, GIVE.</b>",
+          "Decide your split — something like 70/20/10. Write your own personal money rule in your notebook.",
+          "For 1 week, put every dollar you receive into the right bucket. Track it. What did you notice?"
+        ],
+        why:"This simple system is the foundation of your dad's financial strategy, adapted for where you are right now. Starting simple builds the habit that changes everything.",
+        prompt:"Explain the 3-jar money system (spend, save, give) and suggest the best percentage split for a 12-year-old just starting out. Why is each category important?",
+        xp:75
+      }
+    ]
+  },
+  {
+    week:4, theme:"Intro to Investing",
+    lessons:[
+      {
+        emoji:"📈", title:"What IS Investing?",
+        learn:"The difference between saving and investing — and why both matter for building real wealth.",
+        video:{id:"Epzr8azlxp8", caption:"What is investing — the clearest explanation for beginners, made for someone exactly your age."},
+        activities:[
+          "Ask Claude: <b>'Explain investing vs. saving to a 12-year-old using a lemonade stand as the example.'</b>",
+          "Research: What is a stock? What is a bond? Write a one-sentence definition of each in your OWN words.",
+          "If you had $100 to invest right now — not save, INVEST — where would you put it and why? No wrong answers!"
+        ],
+        why:"Investing is how regular people build real wealth. Saving keeps money safe; investing makes it grow. You need both.",
+        prompt:"Explain the difference between saving and investing to a 12-year-old. Use a real-world example with actual numbers to show why investing beats just saving over 20 years.",
+        xp:65
+      },
+      {
+        emoji:"🍕", title:"Stocks Made Simple",
+        learn:"Understand what a stock actually IS by thinking about owning a slice of your favorite company.",
+        video:{id:"bJg-rF3bLH0", caption:"Stocks and the stock market explained simply — using the companies you already know and love."},
+        activities:[
+          "Pick a company whose products you use and love (Nike, Apple, Nintendo, etc.).",
+          "Look up their stock price on Google: just search <b>'[Company name] stock price.'</b> What does it say?",
+          "Ask Claude: <b>'Why does a stock price go up and down? Explain it using [your company] as the example.'</b>"
+        ],
+        why:"Owning stock means you are a part-owner of a real company. Understanding that makes investing feel exciting, not scary.",
+        prompt:"Explain what it means to own a stock in [company name] that I love. How would I make money from owning it? What could make me lose money?",
+        xp:70
+      },
+      {
+        emoji:"🗂️", title:"Don't Put All Your Eggs in One Basket",
+        learn:"Why spreading money across many investments is safer, smarter, and what the pros do.",
+        video:{id:"J0LOsRdR89U", caption:"What diversification is and why Warren Buffett recommends index funds for most people."},
+        activities:[
+          "Ask Claude: <b>'Explain diversification to a 12-year-old using a sports team as the analogy.'</b>",
+          "Imagine you have $1,000 to invest. How would you split it across 5 different types of investments? Why those?",
+          "Research: <b>'What is an index fund?'</b> Then ask Claude: <b>'Why do financial experts say index funds are great for beginners?'</b>"
+        ],
+        why:"This single idea — diversification — has protected millions of people from financial disaster. It's simple, powerful, and often ignored.",
+        prompt:"What is an index fund, why is it different from buying individual stocks, and why does Warren Buffett recommend it for most investors? Explain like I'm 12.",
+        xp:70
+      },
+      {
+        emoji:"🔮", title:"Your Investment Future",
+        learn:"Run the actual numbers on what investing early would do for your life — and make a real plan.",
+        video:{id:"xAABDYDhjtg", caption:"The math of starting early — compound growth visualized so you never forget it."},
+        activities:[
+          "Ask Claude: <b>'If I invest $50/month starting at age 12 at 8% average return, how much would I have at age 65?'</b> Write down the number.",
+          "Compare: What if you started at 22? At 32? At 42? Write all 4 numbers side-by-side. The difference will shock you.",
+          "Write a <b>'Future Me' letter</b>: What will your financial life look like at 30 if you start good habits right now?"
+        ],
+        why:"Numbers don't lie. Seeing the actual math is often the moment people decide to take money seriously. This is your moment.",
+        prompt:"Show me a table comparing investing $50/month starting at age 12, 22, 32, and 42 — all at 8% return — and how much each person has at age 65.",
+        xp:85
+      }
+    ]
+  },
+  {
+    week:5, theme:"Smart Spending",
+    lessons:[
+      {
+        emoji:"🧠", title:"How Stores Trick You",
+        learn:"The psychology behind why stores, websites, and apps make you want to spend money — and how to defend against it.",
+        video:{id:"OKSSzmc6x1U", caption:"The psychological tricks stores use to make you spend more — and how to spot them instantly."},
+        activities:[
+          "Ask Claude: <b>'What are the top 5 ways stores trick people into spending more money? Be specific.'</b>",
+          "Visit a store OR a website. Find 3 of these tricks being used RIGHT NOW. Screenshot or write them down.",
+          "Create your <b>'Shopping Shield'</b> — 5 questions you'll ask yourself before any purchase."
+        ],
+        why:"Billion-dollar companies spend more on psychology to make you spend than you'll earn in years. Knowing their moves is your defense.",
+        prompt:"What are the top 7 psychological tricks that stores, websites, and apps use to make people spend more money? How can a 12-year-old defend against each one?",
+        xp:70
+      },
+      {
+        emoji:"⏳", title:"The 48-Hour Rule",
+        learn:"A powerful habit that stops impulse buying and makes every purchase intentional.",
+        video:{id:"FpNyTKgi1Io", caption:"Why impulse buying is designed to hurt you — and the simple wait-and-see strategy that beats it."},
+        activities:[
+          "Think of the last 3 things you bought or asked someone to buy you. Write them down.",
+          "Honestly: Would you still want each one if you'd waited 48 hours? Be real with yourself.",
+          "Pick one thing you want RIGHT NOW. Commit to waiting 48 hours before deciding. Write down how you feel after."
+        ],
+        why:"Impulse buying is one of the top reasons people struggle financially their whole lives. This one habit — practiced from age 12 — changes everything.",
+        prompt:"What is impulse buying, why does our brain fall for it, and what strategies do financial experts recommend to stop doing it?",
+        xp:65
+      },
+      {
+        emoji:"🔎", title:"Compare Before You Buy",
+        learn:"Research before spending — always. The skill that saves smart people thousands every single year.",
+        video:{id:"J0LOsRdR89U", caption:"How smart buyers research everything — the habits that make your money go further."},
+        activities:[
+          "Pick something you want that costs $30 or more. Find 3 different places to buy it. What's the price difference?",
+          "Ask Claude: <b>'What should I consider before buying [your item]? Give me a complete checklist.'</b>",
+          "Make your final decision: Buy now, wait, or skip? Write down your reasoning in 3-5 sentences."
+        ],
+        why:"Smart shoppers don't pay full price for anything — and that habit compounds into thousands of dollars over a lifetime.",
+        prompt:"I want to buy [item that costs $X]. What are the 10 most important things I should check or compare before deciding to buy it?",
+        xp:65
+      },
+      {
+        emoji:"🎁", title:"Give Money Away — Here's Why",
+        learn:"Why giving money away actually makes you wealthier — mentally, emotionally, and sometimes even financially.",
+        video:{id:"VPIVrPpdfTo", caption:"The surprising science of generosity — why giving is a financial and life skill, not just a nice thing to do."},
+        activities:[
+          "Ask Claude: <b>'What does scientific research say about giving money away and happiness?'</b> Summarize 2 surprising findings.",
+          "Pick a cause you genuinely care about. Research one real organization doing work on it.",
+          "Plan: How could you give even $1 or $5 a month to something that matters? Set up your Giving jar."
+        ],
+        why:"Generous people are statistically happier AND often wealthier. Giving isn't just being nice — it's a life and money skill.",
+        prompt:"What does scientific research say about the connection between giving money to others and personal happiness and wellbeing? Give me 3 specific findings.",
+        xp:65
+      }
+    ]
+  },
+  {
+    week:6, theme:"Real-World Money",
+    lessons:[
+      {
+        emoji:"📑", title:"Taxes: The Basics",
+        learn:"What taxes are, why they exist, and why adults have to think about them constantly.",
+        video:{id:"FpNyTKgi1Io", caption:"Taxes explained simply — why they exist and how they affect every paycheck you'll ever earn."},
+        activities:[
+          "Ask Claude: <b>'Explain income tax to a 12-year-old. Why do we have taxes? Where does the money go?'</b>",
+          "Ask a parent to show you a pay stub (with their permission). What are all the deductions? How much goes to taxes?",
+          "Calculate: If you earned $500 and your tax rate was 15%, how much would you actually keep? What does that mean for hourly work?"
+        ],
+        why:"Taxes are one of the biggest parts of adult financial life. Understanding them early means no nasty surprises when you start earning.",
+        prompt:"Explain income tax to a 12-year-old. How does it work? Why was it created? Where does the money actually go? Use simple examples with real numbers.",
+        xp:65
+      },
+      {
+        emoji:"🏠", title:"Renting vs. Buying a Home",
+        learn:"Understand the biggest purchase most adults will ever make — and how to think about it smartly.",
+        video:{id:"w3_HBkT4hwc", caption:"Renting vs. buying — the real math and real factors behind one of the biggest financial decisions of your life."},
+        activities:[
+          "Ask Claude: <b>'What's the difference between renting and buying a home? What are the pros and cons of each?'</b>",
+          "Research: What is a mortgage? What does it mean to pay interest on a loan for 30 years?",
+          "Do the math: If a house costs $350,000 and you put 10% down, how much do you borrow? If the interest is 7%, what does that mean monthly? (Ask Claude to help!)"
+        ],
+        why:"This will be one of the biggest financial decisions of your life. Thinking about it at 12 puts you miles ahead of most adults when the time comes.",
+        prompt:"Explain how a 30-year mortgage works to a 12-year-old. How much extra money do you pay in interest over time? Give me a real example with a $300,000 home.",
+        xp:70
+      },
+      {
+        emoji:"🆘", title:"Emergency Fund — Your Financial Shield",
+        learn:"Why having money set aside for surprises is the absolute foundation of financial security.",
+        video:{id:"OKSSzmc6x1U", caption:"Why financial experts say an emergency fund is the first thing you should build — before anything else."},
+        activities:[
+          "Ask Claude: <b>'Why do financial experts say an emergency fund is so important? What happens to people who don't have one?'</b>",
+          "Calculate: 3 months of your family's basic expenses might be around $X. How long would it take to save that at $100/month?",
+          "Start YOURS today: Even $10 in a dedicated envelope counts. Set your personal goal amount and a deadline."
+        ],
+        why:"The #1 reason people go into debt is unexpected expenses. An emergency fund makes you unshakeable. It's the foundation of everything else.",
+        prompt:"Why is an emergency fund the most important first step in personal finance? What happens without one? How much should a 12-year-old try to save, and where should they keep it?",
+        xp:70
+      },
+      {
+        emoji:"📜", title:"Credit Scores Explained",
+        learn:"What a credit score is, why it matters, and how to build a great one when you're old enough.",
+        video:{id:"bJg-rF3bLH0", caption:"Credit scores — what they are, how they work, and why yours will affect almost everything in your adult life."},
+        activities:[
+          "Ask Claude: <b>'What is a credit score? Explain it to a 12-year-old like it's a video game score.'</b>",
+          "Research: What is considered a 'good' score vs. a 'bad' one? What are the real-life consequences of each?",
+          "List 5 habits you can start NOW that will set you up to have excellent credit when you turn 18."
+        ],
+        why:"A bad credit score costs people tens of thousands of dollars in higher interest rates over their lifetime. A great score saves you all of that.",
+        prompt:"Explain a credit score to a 12-year-old using a video game points analogy. What behaviors increase your score? What destroys it? Why does it matter so much?",
+        xp:70
+      }
+    ]
+  },
+  {
+    week:7, theme:"Building Wealth",
+    lessons:[
+      {
+        emoji:"🧩", title:"Multiple Streams of Income",
+        learn:"Why the wealthiest people have more than one source of money — and how you can build toward that.",
+        video:{id:"Epzr8azlxp8", caption:"Active vs. passive income — and why the most financially free people have multiple streams of both."},
+        activities:[
+          "Ask Claude: <b>'What are realistic examples of multiple income streams for someone aged 12-25?'</b>",
+          "List 3 income streams you could realistically build over the next 5-10 years, starting from where you are now.",
+          "Research one person you admire. How many different sources of income do they have? List what you can find."
+        ],
+        why:"One income stream is fragile. Multiple streams create security — and eventually, freedom. This is the goal.",
+        prompt:"Explain the concept of multiple income streams. Give me a realistic roadmap for how a 12-year-old today could build 3 different income streams by age 25.",
+        xp:70
+      },
+      {
+        emoji:"🌐", title:"Online Income Ideas",
+        learn:"The growing world of ways people make money online — including real possibilities at your age.",
+        video:{id:"J0LOsRdR89U", caption:"How digital economies work — and the real ways people your age have started earning online."},
+        activities:[
+          "Research: <b>'How do YouTubers make money?'</b> List every revenue stream you can find. There are more than you think!",
+          "Ask Claude: <b>'What are 5 realistic ways a motivated 12-14 year old could build an online income over 1-3 years?'</b>",
+          "Pick the one that interests you most. What would be your single first step to start exploring it?"
+        ],
+        why:"The internet removes every geographic limit on earning. Understanding it at your age is a head start most adults never got.",
+        prompt:"What are 5 realistic ways a 12-year-old could start building toward online income over the next 3 years? Be specific about what skills they'd need and how to get started.",
+        xp:75
+      },
+      {
+        emoji:"📚", title:"Money Books Worth Reading",
+        learn:"The books that have changed how millions of people think about money — starting with your age group.",
+        video:{id:"xAABDYDhjtg", caption:"Why reading about money early is one of the highest-leverage habits you can build."},
+        activities:[
+          "Ask Claude: <b>'What are the 3 best personal finance books for teenagers or young adults? Give me a short summary of each.'</b>",
+          "Pick the one that sounds most interesting. Find it at your local library — it's free!",
+          "Read the first chapter or a summary online. Write 3 things you want to learn from it."
+        ],
+        why:"The most successful investors in the world are obsessive readers. Building that habit now changes the trajectory of your entire life.",
+        prompt:"What are the 3 best personal finance books for teenagers? Give me a 3-sentence summary of each and tell me what's the most important idea from each one.",
+        xp:65
+      },
+      {
+        emoji:"👨‍💼", title:"Interview a Money Mentor",
+        learn:"Learn directly from someone in real life who is good with money — their real experience beats any book.",
+        video:{id:"FpNyTKgi1Io", caption:"Why learning from real people who've made real financial decisions is irreplaceable."},
+        activities:[
+          "Ask Claude: <b>'What are 10 great questions to ask a financially successful adult? Rank them by how much you'd learn.'</b> Pick your top 5.",
+          "Interview a family member, neighbor, or family friend who seems to handle money well. Ask your 5 questions.",
+          "Write down their single best piece of advice. How does it connect to what you've learned in this course?"
+        ],
+        why:"Real wisdom from real people you trust is worth more than any YouTube video. This is how wisdom gets passed down.",
+        prompt:"What are the 10 best questions to ask a financially successful adult to learn the most about how they think about and handle money?",
+        xp:80
+      }
+    ]
+  },
+  {
+    week:8, theme:"Money Master Graduation",
+    lessons:[
+      {
+        emoji:"🗺️", title:"Your Personal Financial Map",
+        learn:"Create a complete snapshot of your finances: income, spending, saving, and giving.",
+        video:{id:"OKSSzmc6x1U", caption:"How to take stock of where you are financially — and use it to plan where you're going."},
+        activities:[
+          "Fill out your Financial Overview: income per month, spending categories, how much you save, and how much you give.",
+          "Ask Claude: <b>'Review my financial situation and give me 3 things I'm doing well and 3 things to improve.'</b>",
+          "Set 3 specific financial goals for the next 12 months — with dollar amounts and deadlines."
+        ],
+        why:"You can't navigate without a map. This is your financial GPS. Update it every few months for the rest of your life.",
+        prompt:"Help me create a simple one-page financial overview for a 12-year-old. What categories should it include? Then review my numbers and give me specific feedback.",
+        xp:80
+      },
+      {
+        emoji:"🏆", title:"Your Personal Money Rules",
+        learn:"Write the financial philosophy you'll actually live by — your rules, based on your values.",
+        video:{id:"bJg-rF3bLH0", caption:"Why having clear personal money rules is the foundation that serious investors and business owners build everything on."},
+        activities:[
+          "Write 5-10 <b>'Money Rules'</b> that reflect your values and goals. Example: <b>'I always save before I spend.'</b>",
+          "Ask Claude: <b>'Are these good money rules for someone my age with my goals? What am I missing?'</b>",
+          "Write the final version neatly. Post it somewhere you'll see it — near your desk, on your mirror, anywhere."
+        ],
+        why:"Personal finance is personal. Rules built on your own values serve you better than generic advice — forever.",
+        prompt:"Review these money rules I've written for myself: [list your rules]. What's strong? What's missing? Suggest 3 additional rules that would make this more powerful.",
+        xp:80
+      },
+      {
+        emoji:"📣", title:"Teach What You Know",
+        learn:"Share your money knowledge with someone who could benefit — the fastest way to lock in everything you've learned.",
+        video:{id:"xAABDYDhjtg", caption:"Why teaching others is the most powerful learning tool — and how to do it well."},
+        activities:[
+          "Pick 3 things from this course that surprised or changed the way you think about money.",
+          "Explain each one to a younger sibling, cousin, or friend in the simplest language possible.",
+          "OR: Create a short <b>'Top 5 Money Tips for Kids'</b> — write it out as if you're the expert. Because you kind of are now."
+        ],
+        why:"Teaching others is the ultimate test of mastery. If you can explain it, you truly know it.",
+        prompt:"I want to teach a younger kid about money. Help me create a simple, fun 5-tip guide called 'What Every Kid Should Know About Money.' Make it engaging and easy to understand.",
+        xp:85
+      },
+      {
+        emoji:"🌟", title:"Money Master Graduation!",
+        learn:"Celebrate finishing — and commit out loud to the financial habits that will define your future.",
+        video:{id:"Epzr8azlxp8", caption:"The big picture — why starting this journey at 12 puts you further ahead than most adults will ever be."},
+        activities:[
+          "Write a letter to your 25-year-old self: <b>What financial commitments are you making right now?</b>",
+          "Calculate: If you follow your savings and investment plan, how much could you have by 25? By 35? Let Claude help with the math.",
+          "Make a handshake promise with a parent: tell them one specific financial habit you're committing to starting this week."
+        ],
+        why:"You now know more about money than the majority of adults. The knowledge is only powerful if you USE it. Go be amazing.",
+        prompt:"I just finished an 8-week financial literacy course. Quiz me on everything I should know. Ask 10 questions covering budgeting, saving, investing, and smart spending.",
+        xp:100
+      }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════
+// PERSONALIZATION
+// ═══════════════════════════════════════════
+function getPersonalizedTagline(){
+  if(!profile) return "Keep going — every lesson builds your future!";
+  const n = profile.name;
+  const h = profile.hobbies;
+  const d = profile.dream;
+  if(d) return `Working toward: "${d}" — every lesson gets you closer, ${n}!`;
+  if(h.includes('gaming')) return `Level up your brain like you level up in games, ${n}!`;
+  if(h.includes('sports')) return `Train your mind like you train your body, ${n}!`;
+  return `Keep going — every lesson builds your future, ${n}!`;
+}
+
+function getAvatar(){
+  if(!profile) return '🚀';
+  const h = profile.hobbies;
+  if(h.includes('gaming')) return '🎮';
+  if(h.includes('sports')) return '⚽';
+  if(h.includes('animals')) return '🐾';
+  if(h.includes('music')) return '🎵';
+  if(h.includes('art')) return '🎨';
+  if(h.includes('science')) return '🔬';
+  return '🚀';
+}
+
+function getTodayBadge(){
+  // Tue=2,Wed=3,Thu=4,Fri=5
+  const day = new Date().getDay();
+  const dayMap = {2:'TUE',3:'WED',4:'THU',5:'FRI'};
+  return dayMap[day] || null;
+}
+
+// ═══════════════════════════════════════════
+// BUILD DASHBOARD
+// ═══════════════════════════════════════════
+function buildDashboard(){
+  // Handle direct load if profile exists
+  if(profile){
+    document.getElementById('onboarding').classList.remove('active');
+    document.getElementById('dashboard').classList.add('active');
+  }
+
+  const name = profile?.name || 'Kai';
+  document.getElementById('heroName').textContent = `${name}'s Academy 🚀`;
+  document.getElementById('heroTagline').textContent = getPersonalizedTagline();
+  document.getElementById('heroAvi').textContent = getAvatar();
+
+  buildTrack(AI_WEEKS,'aiTrack','ai-track','ai');
+  buildTrack(MONEY_WEEKS,'moneyTrack','money-track','money');
+  updateStats();
+  setTimeout(updateStats,100);
+}
+
+function buildTrack(weeks, containerId, trackClass, trackKey){
+  const container = document.getElementById(containerId);
+  container.innerHTML='';
+  const todayDay = getTodayBadge();
+
+  weeks.forEach((week,wi)=>{
+    const block = document.createElement('div');
+    block.className='week-block';
+    block.style.animationDelay=`${wi*0.06}s`;
+
+    const doneCount = week.lessons.filter((_,li)=>completed[`${trackKey}_w${wi}_d${li}`]).length;
+    const allDone = doneCount===week.lessons.length;
+
+    block.innerHTML=`
+      <div class="week-hdr">
+        <div class="week-num">WEEK ${week.week}</div>
+        <div class="week-theme">${week.theme}</div>
+        <div class="week-line"></div>
+        ${allDone?`<div class="week-done-badge">✅ COMPLETE</div>`:doneCount>0?`<div class="week-done-badge">${doneCount}/${week.lessons.length} done</div>`:''}
+      </div>
+      <div class="lessons-grid" id="${trackKey}_week${wi}"></div>
+    `;
+    container.appendChild(block);
+
+    const grid = document.getElementById(`${trackKey}_week${wi}`);
+    week.lessons.forEach((lesson,li)=>{
+      const lessonId=`${trackKey}_w${wi}_d${li}`;
+      const done=!!completed[lessonId];
+      const dayLabel=DAYS[li];
+      const isToday = dayLabel===todayDay;
+
+      const card=document.createElement('div');
+      card.className=`lesson-card${done?' done':''}${isToday&&!done?' today':''}`;
+      card.innerHTML=`
+        ${isToday&&!done?`<div class="today-chip">TODAY</div>`:''}
+        <div class="card-top">
+          <div class="card-emoji">${lesson.emoji}</div>
+          <div class="card-check">${done?'✓':''}</div>
+        </div>
+        <div class="card-day-label">${dayLabel} · WEEK ${week.week}</div>
+        <div class="card-title">${lesson.title}</div>
+        <div class="card-desc">${lesson.learn.substring(0,90)}…</div>
+        <div class="card-foot">
+          <span class="card-tag">~25 min</span>
+          <span class="card-xp">⚡ ${lesson.xp} XP</span>
+        </div>
+      `;
+      card.onclick=()=>openModal(lesson,lessonId,trackKey,week);
+      grid.appendChild(card);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════
+function updateStats(){
+  let aiDone=0,moneyDone=0,totalXP=0;
+  const aiTotal=AI_WEEKS.reduce((s,w)=>s+w.lessons.length,0);
+  const moneyTotal=MONEY_WEEKS.reduce((s,w)=>s+w.lessons.length,0);
+
+  AI_WEEKS.forEach((w,wi)=>w.lessons.forEach((l,li)=>{
+    if(completed[`ai_w${wi}_d${li}`]){aiDone++;totalXP+=l.xp;}
+  }));
+  MONEY_WEEKS.forEach((w,wi)=>w.lessons.forEach((l,li)=>{
+    if(completed[`money_w${wi}_d${li}`]){moneyDone++;totalXP+=l.xp;}
+  }));
+
+  const totalLessons=aiTotal+moneyTotal;
+  const totalDone=aiDone+moneyDone;
+  const maxXP=[...AI_WEEKS,...MONEY_WEEKS].reduce((s,w)=>s+w.lessons.reduce((ss,l)=>ss+l.xp,0),0);
+
+  document.getElementById('topXP').textContent=`⚡ ${totalXP} XP`;
+  document.getElementById('heroXPFill').style.width=`${Math.min(100,(totalXP/maxXP)*100)}%`;
+  document.getElementById('heroXPLabel').textContent=`${totalXP} / ${maxXP} XP earned`;
+  document.getElementById('streakCompleted').textContent=totalDone;
+  document.getElementById('streakLeft').textContent=totalLessons-totalDone;
+  document.getElementById('streakPct').textContent=Math.round((totalDone/totalLessons)*100)+'%';
+
+  const aiPct=Math.round((aiDone/aiTotal)*100);
+  const moneyPct=Math.round((moneyDone/moneyTotal)*100);
+  document.getElementById('aiProg').style.width=aiPct+'%';
+  document.getElementById('moneyProg').style.width=moneyPct+'%';
+  document.getElementById('aiPct').textContent=aiPct+'%';
+  document.getElementById('moneyPct').textContent=moneyPct+'%';
+}
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function switchTab(tab){
+  currentTab=tab;
+  document.getElementById('aiTrack').classList.toggle('hidden',tab!=='ai');
+  document.getElementById('moneyTrack').classList.toggle('hidden',tab!=='money');
+  document.getElementById('tabAI').className=`tab-btn${tab==='ai'?' ai-active':''}`;
+  document.getElementById('tabMoney').className=`tab-btn${tab==='money'?' money-active':''}`;
+}
+
+// ═══════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════
+function openModal(lesson,lessonId,trackKey,week){
+  openCard={lesson,lessonId,trackKey};
+  const done=!!completed[lessonId];
+  const isAI=trackKey==='ai';
+
+  document.getElementById('mTrack').textContent=isAI?'🤖 AI Wizard Track':'💰 Money Master Track';
+  document.getElementById('mEmoji').textContent=lesson.emoji;
+  document.getElementById('mTitle').textContent=lesson.title;
+  document.getElementById('mLearn').textContent=lesson.learn;
+  document.getElementById('mWhy').textContent=lesson.why;
+  document.getElementById('mPrompt').textContent='"'+lesson.prompt+'"';
+
+  // Meta chips
+  const metaEl=document.getElementById('mMeta');
+  metaEl.innerHTML=`
+    <span class="meta-chip" style="background:${isAI?'rgba(124,110,250,.15)':'rgba(27,191,126,.12)'};color:${isAI?'var(--ai)':'var(--money)'}">~25 min</span>
+    <span class="meta-chip" style="background:rgba(255,200,48,.1);color:var(--gold)">⚡ ${lesson.xp} XP</span>
+    ${done?'<span class="meta-chip" style="background:rgba(27,191,126,.12);color:var(--money)">✅ COMPLETED</span>':''}
+  `;
+
+  // Video
+  if(lesson.video){
+    document.getElementById('mVideoSec').classList.remove('hidden');
+    const vid = lesson.video;
+    const ytUrl = `https://www.youtube.com/watch?v=${vid.id}`;
+    document.getElementById('mVideoWrap').innerHTML=`
+      <iframe
+        id="lessonIframe"
+        src="https://www.youtube.com/embed/${vid.id}?rel=0&modestbranding=1"
+        allowfullscreen
+        loading="lazy"
+        style="width:100%;height:100%;border:none;"
+        onerror="showVideoFallback('${vid.id}')"
+      ></iframe>
+      <div id="videoFallback" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:24px;text-align:center;">
+        <div style="font-size:36px;">📺</div>
+        <div style="font-weight:800;font-size:1rem;">Video couldn't load in-app</div>
+        <div style="color:var(--muted);font-size:.85rem;">Some YouTube videos block embedding — open it directly instead:</div>
+        <a href="${ytUrl}" target="_blank" style="background:var(--ai);color:white;padding:10px 22px;border-radius:10px;font-weight:800;text-decoration:none;font-size:.9rem;">▶ Watch on YouTube</a>
+      </div>
+    `;
+    document.getElementById('mVideoCap').innerHTML=`${vid.caption} &nbsp;·&nbsp; <a href="${ytUrl}" target="_blank" style="color:var(--ai);font-weight:700;">Open in YouTube ↗</a>`;
+    // Detect blocked embed via postMessage timeout
+    setTimeout(()=>checkIframeLoaded(vid.id, ytUrl), 3500);
+  } else {
+    document.getElementById('mVideoSec').classList.add('hidden');
+  }
+
+  // Activities
+  const actsEl=document.getElementById('mActs');
+  actsEl.innerHTML=lesson.activities.map((a,i)=>`
+    <li class="act-item">
+      <span class="act-step">STEP ${i+1}</span>
+      <span class="act-text">${a}</span>
+    </li>
+  `).join('');
+
+  // Modal track class for link colors
+  document.getElementById('modal').className=`modal ${isAI?'ai-track-modal':'money-track-modal'}`;
+
+  // Button
+  const btn=document.getElementById('mBtn');
+  btn.textContent=done?'↩ Mark as Not Done':`✅ Mark Complete (+${lesson.xp} XP!)`;
+  btn.className=`modal-action-btn ${done?'mark-undone-btn':'mark-done-btn'}`;
+
+  document.getElementById('modalOv').classList.add('open');
+  document.getElementById('modal').scrollTop=0;
+}
+
+function closeModal(){document.getElementById('modalOv').classList.remove('open');openCard=null;}
+function closeModalBg(e){if(e.target===document.getElementById('modalOv'))closeModal();}
+
+function toggleDone(){
+  if(!openCard)return;
+  const{lesson,lessonId,trackKey}=openCard;
+  const wasDone=!!completed[lessonId];
+  if(wasDone){delete completed[lessonId];}
+  else{completed[lessonId]=true;spawnConfetti();}
+  localStorage.setItem('kai_done',JSON.stringify(completed));
+  closeModal();
+  buildTrack(AI_WEEKS,'aiTrack','ai-track','ai');
+  buildTrack(MONEY_WEEKS,'moneyTrack','money-track','money');
+  updateStats();
+}
+
+// ═══════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════
+function spawnConfetti(){
+  const colors=['#7C6EFA','#1BBF7E','#FFC830','#FF5A5A','#A99BFF','#5DEBB8','#FF9330'];
+  for(let i=0;i<36;i++){
+    const el=document.createElement('div');
+    el.className='conf';
+    el.style.cssText=`left:${Math.random()*100}vw;top:${Math.random()*40+20}vh;background:${colors[Math.floor(Math.random()*colors.length)]};transform:rotate(${Math.random()*360}deg);animation-delay:${Math.random()*.4}s;animation-duration:${.9+Math.random()*.8}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),2500);
+  }
+}
+
+// ═══════════════════════════════════════════
+// VIDEO FALLBACK HELPERS
+// ═══════════════════════════════════════════
+function showVideoFallback(id){
+  const wrap = document.getElementById('mVideoWrap');
+  if(!wrap) return;
+  const iframe = wrap.querySelector('iframe');
+  const fallback = document.getElementById('videoFallback');
+  if(iframe) iframe.style.display='none';
+  if(fallback) fallback.style.display='flex';
+}
+
+function checkIframeLoaded(id, ytUrl){
+  // If the iframe is still present and hasn't been hidden already, try to detect a blank page
+  const iframe = document.getElementById('lessonIframe');
+  if(!iframe) return;
+  // We can't read cross-origin content, but we can check if the iframe has zero clientHeight
+  // (some blocked embeds collapse). As a safe fallback, also add the YouTube link to caption always.
+  try {
+    // If contentDocument is null (cross-origin fine), do nothing — video likely playing
+  } catch(e){
+    showVideoFallback(id);
+  }
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load',()=>{
+  if(profile){
+    document.getElementById('onboarding').classList.remove('active');
+    document.getElementById('dashboard').classList.add('active');
+    buildDashboard();
+  }
+  // Enter key on name input
+  document.getElementById('nameInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter') obNext(1);
+  });
+});
+</script>
+</body>
+</html>

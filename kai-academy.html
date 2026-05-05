@@ -94,6 +94,23 @@ body::before{
 
 .ob-skip{background:none;border:none;color:var(--muted);font-size:0.8rem;cursor:pointer;margin-top:12px;text-decoration:underline;}
 
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;
+  padding:14px 18px;cursor:pointer;transition:all .2s;text-align:left;width:100%;
+  color:var(--text);font-family:'Nunito',sans-serif;
+}
+.returning-user-btn:hover{border-color:var(--ai);background:rgba(124,110,250,.1);}
+.returning-user-avi{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;font-size:20px;
+  background:linear-gradient(135deg,var(--ai),var(--money));
+  display:flex;align-items:center;justify-content:center;
+}
+.returning-user-info{flex:1;}
+.returning-user-name{font-weight:800;font-size:1rem;margin-bottom:2px;}
+.returning-user-meta{font-size:.75rem;color:var(--muted);font-family:'Space Mono',monospace;}
+.returning-user-arrow{font-size:18px;color:var(--muted);}
+.returning-user-btn:hover .returning-user-arrow{color:var(--ai);}
+
 /* ════════════════════════════
    MAIN DASHBOARD
 ════════════════════════════ */
@@ -462,11 +479,29 @@ body::before{
   </div>
 </div>
 
-<!-- ════════════════════════════ DASHBOARD ════════════════════════════ -->
+<!-- ════════════════════════════ WELCOME BACK ════════════════════════════ -->
+<div id="welcomeBack" class="screen">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px 16px;">
+    <div class="ob-logo">🚀 KAI'S ACADEMY</div>
+    <div class="ob-tagline">Who's learning today?</div>
+    <div class="ob-card" style="max-width:480px;width:100%;">
+      <span class="ob-emoji">👋</span>
+      <div class="ob-q">Welcome back!</div>
+      <div class="ob-sub">Pick your name to continue where you left off — or start fresh as someone new.</div>
+      <div id="returningUserList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
+      <button class="ob-btn" style="background:var(--surface2);color:var(--text);border:1.5px solid var(--border);" onclick="startFresh()">➕ I'm someone new — start fresh</button>
+    </div>
+  </div>
+</div>
+
+
 <div id="dashboard" class="screen">
   <div class="top-bar">
     <div class="top-logo">🚀 KAI'S ACADEMY</div>
-    <div class="top-xp" id="topXP">0 XP</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="top-xp" id="topXP">0 XP</div>
+      <button onclick="switchUser()" style="background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;padding:5px 12px;cursor:pointer;white-space:nowrap;">⇄ Switch</button>
+    </div>
   </div>
 
   <div class="dash-wrap">
@@ -564,12 +599,23 @@ body::before{
 
 <script>
 // ═══════════════════════════════════════════
-// STATE
+// STATE  (per-user, keyed by name)
 // ═══════════════════════════════════════════
-let profile = JSON.parse(localStorage.getItem('kai_profile') || 'null');
-let completed = JSON.parse(localStorage.getItem('kai_done') || '{}');
+// Storage layout:
+//   kai_all_profiles  → { "kai": { profile obj }, "jason": { profile obj }, ... }
+//   kai_all_done      → { "kai": { lessonId: true, ... }, "jason": { ... }, ... }
+//   kai_last_user     → "kai"   (who logged in most recently)
+
+function allProfiles(){ return JSON.parse(localStorage.getItem('kai_all_profiles')||'{}'); }
+function allDone()    { return JSON.parse(localStorage.getItem('kai_all_done')||'{}'); }
+function saveProfiles(p){ localStorage.setItem('kai_all_profiles', JSON.stringify(p)); }
+function saveDone(d)    { localStorage.setItem('kai_all_done',     JSON.stringify(d)); }
+function nameKey(n)     { return n.trim().toLowerCase(); }
+
+let profile   = null;
+let completed = {};
 let currentTab = 'ai';
-let openCard = null;
+let openCard   = null;
 
 const DAYS = ['TUE','WED','THU','FRI'];
 
@@ -625,8 +671,18 @@ function finishOnboarding(){
   const name = document.getElementById('nameInput').value.trim() || 'Kai';
   const dream = document.getElementById('dreamInput')?.value.trim() || '';
 
-  profile = { name, hobbies, dream, moneyLevel, aiLevel };
-  localStorage.setItem('kai_profile', JSON.stringify(profile));
+  // Save profile keyed by name
+  const key = nameKey(name);
+  const profiles = allProfiles();
+  profiles[key] = { name, hobbies, dream, moneyLevel, aiLevel };
+  saveProfiles(profiles);
+  localStorage.setItem('kai_last_user', key);
+
+  // Load this user's progress (fresh if new)
+  const done = allDone();
+  completed = done[key] || {};
+
+  profile = profiles[key];
 
   document.getElementById('onboarding').classList.remove('active');
   document.getElementById('dashboard').classList.add('active');
@@ -1591,12 +1647,6 @@ function getTodayBadge(){
 // BUILD DASHBOARD
 // ═══════════════════════════════════════════
 function buildDashboard(){
-  // Handle direct load if profile exists
-  if(profile){
-    document.getElementById('onboarding').classList.remove('active');
-    document.getElementById('dashboard').classList.add('active');
-  }
-
   const name = profile?.name || 'Kai';
   document.getElementById('heroName').textContent = `${name}'s Academy 🚀`;
   document.getElementById('heroTagline').textContent = getPersonalizedTagline();
@@ -1787,7 +1837,10 @@ function toggleDone(){
   const wasDone=!!completed[lessonId];
   if(wasDone){delete completed[lessonId];}
   else{completed[lessonId]=true;spawnConfetti();}
-  localStorage.setItem('kai_done',JSON.stringify(completed));
+  const key = nameKey(profile.name);
+  const done = allDone();
+  done[key] = completed;
+  saveDone(done);
   closeModal();
   buildTrack(AI_WEEKS,'aiTrack','ai-track','ai');
   buildTrack(MONEY_WEEKS,'moneyTrack','money-track','money');
@@ -1834,14 +1887,169 @@ function checkIframeLoaded(id, ytUrl){
 }
 
 // ═══════════════════════════════════════════
+// WELCOME BACK HELPERS
+// ═══════════════════════════════════════════
+function loadUser(key){
+  const profiles = allProfiles();
+  const done     = allDone();
+  profile   = profiles[key];
+  completed = done[key] || {};
+  localStorage.setItem('kai_last_user', key);
+
+  document.getElementById('welcomeBack').classList.remove('active');
+  document.getElementById('onboarding').classList.remove('active');
+  document.getElementById('dashboard').classList.add('active');
+  buildDashboard();
+}
+
+function startFresh(){
+  // Reset onboarding state vars
+  hobbies = []; moneyLevel = ''; aiLevel = '';
+  document.getElementById('nameInput').value = '';
+  document.getElementById('ob1').classList.remove('hidden');
+  ['ob2','ob3','ob4','ob5'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  // Deselect any previously picked options
+  document.querySelectorAll('.ob-opt').forEach(o=>o.classList.remove('sel','money-sel'));
+
+  document.getElementById('welcomeBack').classList.remove('active');
+  document.getElementById('onboarding').classList.add('active');
+}
+
+function switchUser(){
+  const profiles = allProfiles();
+  buildWelcomeBack(profiles);
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('welcomeBack').classList.add('active');
+}
+
+
+function buildWelcomeBack(profiles){
+  const list = document.getElementById('returningUserList');
+  list.innerHTML = '';
+
+  const avatarFor = p => {
+    const h = p.hobbies || [];
+    if(h.includes('gaming')) return '🎮';
+    if(h.includes('sports')) return '⚽';
+    if(h.includes('animals')) return '🐾';
+    if(h.includes('music')) return '🎵';
+    if(h.includes('art')) return '🎨';
+    if(h.includes('science')) return '🔬';
+    return '🚀';
+  };
+
+  const xpFor = key => {
+    const done = allDone()[key] || {};
+    let xp = 0;
+    AI_WEEKS.forEach((w,wi)=>w.lessons.forEach((l,li)=>{ if(done[`ai_w${wi}_d${li}`]) xp+=l.xp; }));
+    MONEY_WEEKS.forEach((w,wi)=>w.lessons.forEach((l,li)=>{ if(done[`money_w${wi}_d${li}`]) xp+=l.xp; }));
+    return xp;
+  };
+
+  const doneCountFor = key => Object.keys(allDone()[key]||{}).length;
+
+  Object.entries(profiles).forEach(([key, p])=>{
+    const xp    = xpFor(key);
+    const count = doneCountFor(key);
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;';
+
+    // Main user button
+    const btn = document.createElement('button');
+    btn.className = 'returning-user-btn';
+    btn.style.flex = '1';
+    btn.innerHTML = `
+      <div class="returning-user-avi">${avatarFor(p)}</div>
+      <div class="returning-user-info">
+        <div class="returning-user-name">${p.name}</div>
+        <div class="returning-user-meta">⚡ ${xp} XP · ${count} lessons done</div>
+      </div>
+      <div class="returning-user-arrow">→</div>
+    `;
+    btn.onclick = () => loadUser(key);
+
+    // Delete button
+    const del = document.createElement('button');
+    del.title = 'Delete this user';
+    del.style.cssText = `
+      flex-shrink:0;width:40px;height:40px;border-radius:10px;border:1.5px solid var(--border);
+      background:var(--surface2);color:var(--muted);font-size:16px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;transition:all .2s;
+    `;
+    del.innerHTML = '🗑️';
+    del.onmouseenter = () => { del.style.borderColor='var(--red)'; del.style.background='rgba(255,90,90,.1)'; del.style.color='var(--red)'; };
+    del.onmouseleave = () => { del.style.borderColor='var(--border)'; del.style.background='var(--surface2)'; del.style.color='var(--muted)'; };
+    del.onclick = (e) => {
+      e.stopPropagation();
+      confirmDeleteUser(key, p.name);
+    };
+
+    row.appendChild(btn);
+    row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+
+function confirmDeleteUser(key, name){
+  // Inline confirmation — replaces the list temporarily
+  const list = document.getElementById('returningUserList');
+  const original = list.innerHTML;
+
+  list.innerHTML = `
+    <div style="background:rgba(255,90,90,.08);border:1.5px solid rgba(255,90,90,.3);border-radius:14px;padding:18px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:10px;">🗑️</div>
+      <div style="font-weight:800;font-size:1rem;margin-bottom:6px;">Delete <span style="color:var(--red);">${name}</span>?</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:18px;line-height:1.5;">This will permanently erase all their progress and XP. This cannot be undone.</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="cancelDelete()" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Cancel</button>
+        <button onclick="deleteUser('${key}')" style="flex:1;padding:11px;border-radius:10px;border:none;background:var(--red);color:white;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Yes, Delete</button>
+      </div>
+    </div>
+  `;
+}
+
+function cancelDelete(){
+  // Rebuild the list fresh
+  buildWelcomeBack(allProfiles());
+}
+
+function deleteUser(key){
+  // Remove from profiles
+  const profiles = allProfiles();
+  delete profiles[key];
+  saveProfiles(profiles);
+
+  // Remove from done
+  const done = allDone();
+  delete done[key];
+  saveDone(done);
+
+  // If no profiles left, go to fresh onboarding
+  if(Object.keys(profiles).length === 0){
+    document.getElementById('welcomeBack').classList.remove('active');
+    document.getElementById('onboarding').classList.add('active');
+  } else {
+    buildWelcomeBack(profiles);
+  }
+}
+
+// ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
 window.addEventListener('load',()=>{
-  if(profile){
-    document.getElementById('onboarding').classList.remove('active');
-    document.getElementById('dashboard').classList.add('active');
-    buildDashboard();
+  const profiles = allProfiles();
+  const hasProfiles = Object.keys(profiles).length > 0;
+
+  if(hasProfiles){
+    // Show welcome-back chooser
+    buildWelcomeBack(profiles);
+    document.getElementById('welcomeBack').classList.add('active');
+  } else {
+    // First time ever — go straight to onboarding
+    document.getElementById('onboarding').classList.add('active');
   }
+
   // Enter key on name input
   document.getElementById('nameInput').addEventListener('keydown',e=>{
     if(e.key==='Enter') obNext(1);
